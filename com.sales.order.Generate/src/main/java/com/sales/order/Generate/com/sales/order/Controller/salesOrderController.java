@@ -22,17 +22,12 @@ import com.sales.order.Generate.com.sales.order.Service.salesOrderService;
 public class salesOrderController {
 
     private final salesOrderService salesOrderService;
-    private final purchaseOrderService purchaseOrderService;
-    private final inventoryCycleCountService inventoryCycleCountService;
 
     public salesOrderController(
-            salesOrderService salesOrderService,
-            purchaseOrderService purchaseOrderService,
-            inventoryCycleCountService inventoryCycleCountService) {
+            salesOrderService salesOrderService) {
 
         this.salesOrderService = salesOrderService;
-        this.purchaseOrderService = purchaseOrderService;
-        this.inventoryCycleCountService = inventoryCycleCountService;
+       
     }
 
     // SALES ORDER
@@ -48,44 +43,6 @@ public class salesOrderController {
         }
     }
 
-    // PURCHASE ORDER
-    @PostMapping("/purchase-order/create")
-    public ResponseEntity<?> createPurchaseOrder(
-            @RequestBody purchaseOrderEntity request) {
-
-        try {
-            return buildResponse(purchaseOrderService.createPurchaseOrder(request));
-        } catch (Exception e) {
-            return errorResponse("Failed to create JDE Purchase Order", e);
-        }
-    }
-
-    // INVENTORY CYCLE COUNT
-    // Create Cycle Count
-    @PostMapping("/inventoryCycleCount/create")
-    public ResponseEntity<?> createInventoryCycleCount(
-            @RequestBody inventoryCycleCountEntity request) {
-
-        try {
-            return buildResponse(
-                    inventoryCycleCountService.createInventoryCycleCount(request));
-        } catch (Exception e) {
-            return errorResponse("Failed to create JDE Inventory Cycle Count", e);
-        }
-    }
-
-    // Review Cycle Count (POST: a GET request body is dropped by many clients/proxies)
-    @PostMapping("/inventoryCycleCount/reviews")
-    public ResponseEntity<?> reviewInventoryCycleCount(
-            @RequestBody inventoryCycleCountEntity request) {
-
-        try {
-            return buildResponse(
-                    inventoryCycleCountService.reviewInventoryCycleCount(request));
-        } catch (Exception e) {
-            return errorResponse("Failed to review JDE Inventory Cycle Count", e);
-        }
-    }
     
     // COMMON HANDLERS
     private ResponseEntity<?> errorResponse(String message, Exception e) {
