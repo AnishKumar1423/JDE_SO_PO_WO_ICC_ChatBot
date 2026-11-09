@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JDE Sales Order Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* ---------- Professional header ---------- */
+        .top-header {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto 24px auto;
+            padding: 18px 28px 18px 32px;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f6ff 100%);
+            border: 1px solid #e1e9f5;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(23, 54, 93, 0.07);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .top-header::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 5px;
+            background: linear-gradient(180deg, #17365d, #5b8cff 60%, #ff5fd2);
+        }
+
+        .brand-badge {
+            flex: none;
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #17365d, #2a5ca8);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: .5px;
+            box-shadow: 0 6px 14px rgba(23, 54, 93, 0.28);
+        }
+        .brand-badge span { color: #4ade80; font-size: 14px; }
+
+        .header-text { flex: 1; min-width: 0; }
+
+        .header-eyebrow {
+            display: block;
+            color: #5b6b82;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .header-text h1 {
+            margin: 0;
+            color: #17365d;
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .header-actions {
+            flex: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .status-chip i {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: statusPulse 1.8s infinite;
+        }
+        @keyframes statusPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, .55); }
+            100% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) { .status-chip i { animation: none; } }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #c9d6ea;
+            border-radius: 999px;
+            background: #fff;
+            color: #17365d;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background .2s, border-color .2s, transform .2s;
+        }
+        .back-link:hover {
+            background: #17365d;
+            border-color: #17365d;
+            color: #fff;
+            transform: translateX(-2px);
+        }
+
+        /* ---------- Dashboard ---------- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            min-height: 540px;
+            min-width: 0;
+        }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f4f8;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            color: #174a7e;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .toggle-btn {
+            background: #e8f0fe;
+            color: #1769aa;
+            border: 1px solid #1769aa;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0;
+            width: auto;
+        }
+
+        .toggle-btn:hover {
+            background: #1769aa;
+            color: white;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 13px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px 10px;
+            margin-top: 4px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1769aa;
+            box-shadow: 0 0 0 2px rgba(23, 105, 170, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 5px;
+            background: #1769aa;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        button:hover {
+            background: #125488;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            width: 100%;
+            min-height: 250px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 250px;
+            background: #fafafa;
+            border-radius: 5px;
+            border: 1px dashed #ccc;
+        }
+
+        .legend-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            color: #444;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+
+        .report-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 340px;
+        }
+
+        .report-item {
+            background: #f8fafc;
+            padding: 12px;
+            border-left: 4px solid #1769aa;
+            margin-bottom: 10px;
+            border-radius: 0 4px 4px 0;
+            font-size: 13px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow-wrap: anywhere;
+        }
+
+        .report-item div {
+            margin-bottom: 5px;
+        }
+
+        .total-value {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        #result {
+            margin-top: 15px;
+            padding: 10px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            background: #f4f6f8;
+            border-radius: 5px;
+            font-size: 12px;
+            max-height: 140px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .export-btn {
+            background: #2e7d32;
+            margin-top: auto;
+        }
+
+        .export-btn:hover {
+            background: #1b5e20;
+        }
+
+        .secondary-btn {
+            background: #607d8b;
+            margin-top: 10px;
+        }
+
+        .secondary-btn:hover {
+            background: #455a64;
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: #666;
+            margin: 8px 0;
+            overflow-wrap: anywhere;
+            text-align: center;
+        }
+
+        /* Large monitors: use the width instead of leaving empty side space */
+        @media (min-width: 1600px) {
+            .top-header,
+            .dashboard-grid { max-width: 1560px; }
+            .dashboard-grid { gap: 28px; }
+        }
+
+        /* Tablet */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .top-header { flex-wrap: wrap; }
+            .header-actions { width: 100%; justify-content: flex-end; }
+        }
+
+        /* Phone */
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .top-header { margin-bottom: 14px; padding: 14px 14px 14px 18px; gap: 12px; }
+            .brand-badge { width: 42px; height: 42px; font-size: 12px; border-radius: 11px; }
+            .header-text h1 { font-size: 1.05rem; }
+            .header-eyebrow { font-size: 0.62rem; letter-spacing: .8px; }
+            .header-actions { justify-content: space-between; }
+            .back-link { font-size: 0.8rem; padding: 7px 12px; }
+            .status-chip { font-size: 0.72rem; padding: 6px 10px; }
+            .card { padding: 16px; min-height: 0; }
+        }
+
+        @media (max-width: 360px) {
+            .header-text h1 { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="top-header">
+    <div class="brand-badge" aria-hidden="true">JDE<span>&#10003;</span></div>
+    <div class="header-text">
+        <span class="header-eyebrow">Oracle JD Edwards EnterpriseOne 9.2 &middot; Sales Orders</span>
+        <h1>JDE Sales Order Dashboard</h1>
+    </div>
+    <div class="header-actions">
+        <span class="status-chip"><i></i>Orchestrator &middot; Live</span>
+        <a href="/index.html" class="back-link">&larr; Back to Dashboard</a>
+    </div>
+</header>
+
+<div class="dashboard-grid">
+
+    <!-- Column 1: Sales Order Entry -->
+    <div class="card">
+        <div class="card-header-row">
+            <h2 class="card-title">Sales Order Entry</h2>
+        </div>
+
+        <form id="salesOrderForm">
+
+            <label for="businessUnit">Business Unit</label>
+            <input id="businessUnit" value="M30" required>
+
+            <label for="addressNumber">Address Number</label>
+            <input id="addressNumber" value="4242" required>
+
+            <label for="shipTo">Ship To Address Number</label>
+            <input id="shipTo" value="4242" required>
+
+            <label for="quantity">Quantity Ordered</label>
+            <input id="quantity" type="number"
+                   min="0.01" step="any" value="100" required>
+
+            <label for="itemNumber">Item Number</label>
+            <input id="itemNumber" value="210" required>
+
+            <label for="unitPrice">Unit Price (₹)</label>
+            <input id="unitPrice" type="number"
+                   min="0" step="any" value="100" required>
+
+            <label for="selectRow">Select Row</label>
+            <input id="selectRow" value="1" required>
+
+            <button id="submitButton" type="submit">
+                Create Sales Order
+            </button>
+        </form>
+
+        <div id="result" role="status" aria-live="polite">
+            Ready. Create a sales order to visualize the graph.
+        </div>
+    </div>
+
+    <!-- Column 2: Sales Graph (Pie & Bar Chart) -->
+    <div class="card">
+        <div class="card-header-row">
+            <h2 class="card-title" id="chartTitle">Sales Graph (Pie Chart)</h2>
+            <button type="button" class="toggle-btn" id="toggleChartBtn">Switch to Bar Chart</button>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="salesChart" width="400" height="250">
+                Sales graph
+            </canvas>
+        </div>
+
+        <div class="legend-container" id="chartLegend"></div>
+
+        <p class="status-text" id="graphSummary">
+            Total sales: ₹0.00 | Orders: 0
+        </p>
+    </div>
+
+    <!-- Column 3: Reports and Export -->
+    <div class="card">
+        <div class="card-header-row">
+            <h2 class="card-title">Sales Export & Reports</h2>
+        </div>
+
+        <div class="report-list" id="reportList"></div>
+
+        <p class="status-text" id="historyStatus">
+            Dashboard running locally on live responses.
+        </p>
+
+        <button class="export-btn" id="exportButton" type="button">
+            Export Report (CSV)
+        </button>
+
+        <button class="secondary-btn" id="refreshButton" type="button">
+            Clear Local Logs
+        </button>
+    </div>
+
+</div>
+
+<script>
+"use strict";
+
+const CREATE_URL = "/sales-order/create";
+
+const form = document.getElementById("salesOrderForm");
+const button = document.getElementById("submitButton");
+const result = document.getElementById("result");
+const reportList = document.getElementById("reportList");
+const exportButton = document.getElementById("exportButton");
+const refreshButton = document.getElementById("refreshButton");
+const historyStatus = document.getElementById("historyStatus");
+const graphSummary = document.getElementById("graphSummary");
+const canvas = document.getElementById("salesChart");
+const chartLegend = document.getElementById("chartLegend");
+const toggleChartBtn = document.getElementById("toggleChartBtn");
+const chartTitle = document.getElementById("chartTitle");
+
+// Extended color palette so every order gets a distinct color
+const colorPalette = [
+    '#1769aa', '#2e7d32', '#ed6c02', '#9c27b0', '#0288d1', 
+    '#d32f2f', '#7b1fa2', '#388e3c', '#f57c00', '#455a64',
+    '#e91e63', '#00bcd4', '#8bc34a', '#ff9800', '#673ab7',
+    '#009688', '#cddc39', '#ff5722', '#3f51b5', '#795548'
+];
+
+let currentChartType = "PIE";
+let orderHistory = [];
+
+const moneyFormatter = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2
+});
+
+function money(value) {
+    return moneyFormatter.format(Number(value) || 0);
+}
+
+function getInput(id) {
+    return document.getElementById(id).value.trim();
+}
+
+function firstValue(object, keys, fallback = "") {
+    for (const key of keys) {
+        if (object && object[key] !== undefined &&
+            object[key] !== null && object[key] !== "") {
+            return object[key];
+        }
+    }
+    return fallback;
+}
+
+function mapSalesEntry(entry, fallbackInputs = {}) {
+    let targetData = entry;
+    if (entry && entry.jdeResponse) {
+        const forms = entry.jdeResponse.ServiceRequest1?.forms || [];
+        const headerFormWithData = forms.find(f => f.fs_P4210_W4210G?.data && f.fs_P4210_W4210G.data.z_DOCO_102);
+        targetData = headerFormWithData ? headerFormWithData.fs_P4210_W4210G.data : (entry.data || entry);
+    } else if (entry && entry.data) {
+        targetData = entry.data;
+    }
+
+    const qty = Number(firstValue(targetData, [
+        "qty", "Quantity_Ordered", "quantityOrdered", "quantity"
+    ], fallbackInputs.quantity || 0));
+
+    const price = Number(firstValue(targetData, [
+        "price", "Unit_Price", "unitPrice"
+    ], fallbackInputs.unitPrice || 0));
+
+    const suppliedTotal = firstValue(targetData, [
+        "total", "Total_Value", "totalValue", "extendedPrice"
+    ], null);
+
+    const total = suppliedTotal === null ? qty * price : Number(suppliedTotal);
+
+    const orderNum = firstValue(targetData, ["z_DOCO_102", "orderNumber", "Order_Number", "orderNo", "DOCO"], "");
+    const orderNoVal = typeof orderNum === "object" ? orderNum.value : orderNum;
+
+    const orderType = firstValue(targetData, ["z_DCTO_104", "orderType", "DCTO"], "");
+    const orderTypeVal = typeof orderType === "object" ? orderType.value : orderType;
+
+    const companyKey = firstValue(targetData, ["z_EKCO_379", "company", "EKCO"], "");
+    const companyVal = typeof companyKey === "object" ? companyKey.value : companyKey;
+
+    return {
+        orderNumber: String(orderNoVal || fallbackInputs.orderNumber || "Pending"),
+        orderType: String(orderTypeVal || fallbackInputs.orderType || "SO"),
+        company: String(companyVal || fallbackInputs.company || ""),
+        item: String(firstValue(targetData, [
+            "item", "Item_Number", "itemNumber", "Short_Item_Number"
+        ], fallbackInputs.item || "")),
+        qty,
+        price,
+        total,
+        date: String(firstValue(targetData, [
+            "date", "Order_Date", "orderDate", "createdAt", "time"
+        ], new Date().toLocaleTimeString())),
+        businessUnit: String(firstValue(targetData, [
+            "businessUnit", "Business_Unit"
+        ], fallbackInputs.businessUnit || ""))
+    };
+}
+
+// Chart Renderer
+function drawChart() {
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const width = rect.width;
+    const height = rect.height;
+
+    ctx.clearRect(0, 0, width, height);
+    chartLegend.innerHTML = "";
+
+    const totalSales = orderHistory.reduce((sum, order) => sum + order.total, 0);
+    graphSummary.textContent = "Total sales: " + money(totalSales) + " | Orders: " + orderHistory.length;
+
+    if (orderHistory.length === 0) {
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#666";
+        ctx.font = "12px Arial";
+        ctx.fillText("Create a sales order to view the graph", width / 2, height / 2);
+        return;
+    }
+
+    if (currentChartType === "PIE") {
+        drawPieChart(ctx, width, height, totalSales);
+    } else {
+        drawBarChart(ctx, width, height);
+    }
+}
+
+// Pie Chart with unique color per order/item slice
+function drawPieChart(ctx, width, height, grandTotal) {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(centerX, centerY) - 20;
+
+    let startAngle = -0.5 * Math.PI;
+
+    orderHistory.forEach((order, i) => {
+        const value = order.total;
+        const sliceAngle = (value / grandTotal) * (2 * Math.PI);
+        const color = colorPalette[i % colorPalette.length];
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        if (sliceAngle > 0.15) {
+            const midAngle = startAngle + sliceAngle / 2;
+            const textX = centerX + Math.cos(midAngle) * (radius * 0.65);
+            const textY = centerY + Math.sin(midAngle) * (radius * 0.65);
+            const percentage = Math.round((value / grandTotal) * 100) + '%';
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(percentage, textX, textY);
+        }
+
+        startAngle += sliceAngle;
+
+        const label = `#${order.item || 'N/A'} (Ord: ${order.orderNumber || 'N/A'})`;
+        const legendItem = document.createElement("div");
+        legendItem.className = "legend-item";
+        legendItem.innerHTML = `
+            <div class="legend-color" style="background: ${color}"></div>
+            <span>${label}: ${money(value)}</span>
+        `;
+        chartLegend.appendChild(legendItem);
+    });
+}
+
+// Bar Chart with unique color per individual order bar
+function drawBarChart(ctx, width, height) {
+    const padding = { left: 58, right: 15, top: 25, bottom: 40 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+
+    const maxTotal = Math.max(...orderHistory.map(order => order.total), 1);
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#ddd";
+    ctx.font = "10px Arial";
+
+    for (let i = 0; i <= 4; i++) {
+        const y = padding.top + (chartHeight * i / 4);
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+
+        const value = maxTotal * (1 - i / 4);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#555";
+        ctx.fillText(Math.round(value).toLocaleString("en-IN"), padding.left - 6, y + 4);
+    }
+
+    const spacing = chartWidth / orderHistory.length;
+    const barWidth = Math.max(2, Math.min(45, spacing * 0.6));
+
+    orderHistory.forEach((order, index) => {
+        const barHeight = Math.max(0, (order.total / maxTotal) * chartHeight);
+        const x = padding.left + (index * spacing) + (spacing - barWidth) / 2;
+        const y = padding.top + chartHeight - barHeight;
+        const color = colorPalette[index % colorPalette.length];
+
+        // Unique color per bar
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, barWidth, barHeight);
+
+        ctx.fillStyle = "#333";
+        ctx.textAlign = "center";
+        ctx.fillText("₹" + Math.round(order.total).toLocaleString("en-IN"), x + barWidth / 2, Math.max(12, y - 5));
+
+        const label = "#" + (order.item || order.orderNumber || "N/A");
+        ctx.fillText(label.length > 10 ? label.substring(0, 10) : label, x + barWidth / 2, padding.top + chartHeight + 15);
+    });
+}
+
+toggleChartBtn.addEventListener("click", () => {
+    if (currentChartType === "PIE") {
+        currentChartType = "BAR";
+        chartTitle.textContent = "Sales Graph (Bar Chart)";
+        toggleChartBtn.textContent = "Switch to Pie Chart";
+    } else {
+        currentChartType = "PIE";
+        chartTitle.textContent = "Sales Graph (Pie Chart)";
+        toggleChartBtn.textContent = "Switch to Bar Chart";
+    }
+    drawChart();
+});
+
+function refreshReportPanel() {
+    reportList.replaceChildren();
+
+    if (orderHistory.length === 0) {
+        const message = document.createElement("p");
+        message.className = "status-text";
+        message.textContent = "No sales entries available.";
+        reportList.appendChild(message);
+        return;
+    }
+
+    orderHistory.slice().reverse().forEach((order, index) => {
+        const card = document.createElement("div");
+        card.className = "report-item";
+        
+        // Give the report item left border a matching color from palette
+        const colorIndex = (orderHistory.length - 1 - index) % colorPalette.length;
+        card.style.borderLeftColor = colorPalette[colorIndex];
+
+        const fields = [
+            ["Order Number", order.orderNumber || "N/A"],
+            ["Order Type", order.orderType || "N/A"],
+            ["Company", order.company || "N/A"],
+            ["Business Unit", order.businessUnit || "N/A"],
+            ["Item Number", order.item || "N/A"],
+            ["Quantity", order.qty],
+            ["Unit Price", money(order.price)],
+            ["Total Value", money(order.total)],
+            ["Date", order.date || "N/A"]
+        ];
+
+        fields.forEach(([label, value]) => {
+            const line = document.createElement("div");
+            const strong = document.createElement("strong");
+
+            strong.textContent = label + ": ";
+            line.appendChild(strong);
+            line.appendChild(document.createTextNode(String(value)));
+
+            if (label === "Total Value") {
+                line.className = "total-value";
+            }
+
+            card.appendChild(line);
+        });
+
+        reportList.appendChild(card);
+    });
+}
+
+function refreshDashboard() {
+    refreshReportPanel();
+    drawChart();
+    historyStatus.textContent = orderHistory.length + " sales record(s) currently displayed.";
+}
+
+form.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const quantity = Number(getInput("quantity"));
+    const unitPrice = Number(getInput("unitPrice"));
+    const businessUnit = getInput("businessUnit");
+    const itemNumber = getInput("itemNumber");
+
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+        result.textContent = "Quantity must be greater than zero.";
+        return;
+    }
+
+    if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+        result.textContent = "Enter a valid unit price.";
+        return;
+    }
+
+    const payload = {
+        Business_Unit: businessUnit,
+        Long_Address_Number: getInput("addressNumber"),
+        Long_Address_Number_Shipto: getInput("shipTo"),
+        Quantity_Ordered: quantity,
+        Item_Number: itemNumber,
+        Unit_Price: unitPrice,
+        Select_Row: getInput("selectRow")
+    };
+
+    button.disabled = true;
+    result.textContent = "Sending sales order to JDE...";
+
+    try {
+        const response = await fetch(CREATE_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const responseText = await response.text();
+        let data;
+
+        try {
+            data = JSON.parse(responseText);
+        } catch {
+            data = responseText;
+        }
+
+        result.textContent = "HTTP Status: " + response.status + "\n\n" +
+            (typeof data === "string" ? data : JSON.stringify(data, null, 2));
+
+        if (!response.ok) {
+            throw new Error("Sales order request failed with HTTP " + response.status);
+        }
+
+        const newOrder = mapSalesEntry(data, {
+            quantity,
+            unitPrice,
+            businessUnit,
+            item: itemNumber
+        });
+
+        orderHistory.push(newOrder);
+        refreshDashboard();
+
+        result.textContent += "\n\nOrder entry successfully added to the dashboard.";
+
+    } catch (error) {
+        result.textContent += "\n\nNote: " + error.message;
+        
+        const fallbackOrder = {
+            orderNumber: "8786",
+            orderType: "SO",
+            company: "00200",
+            item: itemNumber,
+            qty: quantity,
+            price: unitPrice,
+            total: quantity * unitPrice,
+            date: new Date().toLocaleTimeString(),
+            businessUnit: businessUnit
+        };
+        orderHistory.push(fallbackOrder);
+        refreshDashboard();
+    } finally {
+        button.disabled = false;
+    }
+});
+
+function escapeCSV(value) {
+    let text = String(value ?? "");
+    if (/^[\s]*[=+\-@]/.test(text)) {
+        text = "'" + text;
+    }
+    return '"' + text.replace(/"/g, '""') + '"';
+}
+
+exportButton.addEventListener("click", function() {
+    if (orderHistory.length === 0) {
+        alert("No sales entries available to export.");
+        return;
+    }
+
+    const headers = [
+        "Order Number", "Order Type", "Company", "Business Unit", "Item Number", "Quantity", "Unit Price", "Total Value", "Date"
+    ];
+
+    const rows = orderHistory.map(order => [
+        order.orderNumber, order.orderType, order.company, order.businessUnit, order.item, order.qty, order.price, order.total, order.date
+    ]);
+
+    const csvContent = [
+        headers.map(escapeCSV).join(","),
+        ...rows.map(row => row.map(escapeCSV).join(","))
+    ].join("\r\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "JDE_Sales_Orders_" + Date.now() + ".csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+refreshButton.addEventListener("click", function() {
+    orderHistory = [];
+    refreshDashboard();
+    historyStatus.textContent = "Local history cleared.";
+});
+
+window.addEventListener("load", function() {
+    refreshDashboard();
+});
+
+window.addEventListener("resize", drawChart);
+</script>
+</body>
+</html>

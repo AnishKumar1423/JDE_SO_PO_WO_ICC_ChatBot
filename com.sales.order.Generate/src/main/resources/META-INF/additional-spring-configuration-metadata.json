@@ -1,0 +1,27 @@
+{"properties": [
+  {
+    "name": "jde.ais.url",
+    "type": "java.lang.String",
+    "description": "A description for 'jde.ais.url'"
+  },
+  {
+    "name": "jde.ais.connect-timeout-ms",
+    "type": "java.lang.String",
+    "description": "A description for 'jde.ais.connect-timeout-ms'"
+  },
+  {
+    "name": "jde.ais.username",
+    "type": "java.lang.String",
+    "description": "A description for 'jde.ais.username'"
+  },
+  {
+    "name": "jde.ais.password",
+    "type": "java.lang.String",
+    "description": "A description for 'jde.ais.password'"
+  },
+  {
+    "name": "jde.ais.read-timeout-ms",
+    "type": "java.lang.String",
+    "description": "A description for 'jde.ais.read-timeout-ms'"
+  }
+]}

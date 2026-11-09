@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JDE Purchase Order Dashboard</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f1f4f8;
+    margin: 0;
+    padding: 20px;
+}
+
+/* ---------- Professional header ---------- */
+.top-header {
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto 24px auto;
+    padding: 18px 28px 18px 32px;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f6ff 100%);
+    border: 1px solid #e1e9f5;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(23, 54, 93, 0.07);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+.top-header::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: linear-gradient(180deg, #17365d, #5b8cff 60%, #ff5fd2);
+}
+
+.brand-badge {
+    flex: none;
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #17365d, #2a5ca8);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: .5px;
+    box-shadow: 0 6px 14px rgba(23, 54, 93, 0.28);
+}
+.brand-badge span { color: #4ade80; font-size: 14px; }
+
+.header-text { flex: 1; min-width: 0; }
+
+.header-eyebrow {
+    display: block;
+    color: #5b6b82;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.header-text h1 {
+    margin: 0;
+    color: #17365d;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.header-actions {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #047857;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.status-chip i {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: statusPulse 1.8s infinite;
+}
+@keyframes statusPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, .55); }
+    100% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .status-chip i { animation: none; } }
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid #c9d6ea;
+    border-radius: 999px;
+    background: #fff;
+    color: #17365d;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .2s, border-color .2s, transform .2s;
+}
+.back-link:hover {
+    background: #17365d;
+    border-color: #17365d;
+    color: #fff;
+    transform: translateX(-2px);
+}
+
+/* Dashboard Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 540px;
+    padding: 24px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #f1f4f8;
+}
+
+.card-title {
+    margin: 0;
+    color: #174a7e;
+    font-size: 18px;
+}
+
+/* Toggle Button */
+.toggle-btn {
+    width: auto;
+    margin: 0;
+    padding: 6px 10px;
+    color: #1769aa;
+    font-size: 12px;
+    font-weight: bold;
+    background: #e8f0fe;
+    border: 1px solid #1769aa;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.toggle-btn:hover {
+    color: white;
+    background: #1769aa;
+}
+
+/* Form Elements */
+label {
+    display: block;
+    margin-top: 10px;
+    color: #333;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top: 4px;
+    font-size: 14px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #1769aa;
+    box-shadow: 0 0 0 2px rgba(23, 105, 170, 0.2);
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    background: #1769aa;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #125488;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* Chart */
+.chart-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    width: 100%;
+    min-height: 250px;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 250px;
+    background: #fafafa;
+    border: 1px dashed #ccc;
+    border-radius: 5px;
+}
+
+/* Chart Legend */
+.legend-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-height: 80px;
+    margin-top: 10px;
+    overflow-y: auto;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    color: #444;
+    font-size: 11px;
+}
+
+.legend-color {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    border-radius: 3px;
+}
+
+/* Report List */
+.report-list {
+    flex-grow: 1;
+    max-height: 340px;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.report-item {
+    padding: 12px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    background: #f8fafc;
+    border-left: 4px solid #1769aa;
+    border-radius: 0 4px 4px 0;
+    overflow-wrap: anywhere;
+}
+
+.report-item div {
+    margin-bottom: 5px;
+}
+
+.total-value {
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+/* Result Area */
+#result {
+    max-height: 140px;
+    padding: 10px;
+    margin-top: 15px;
+    overflow-y: auto;
+    color: #333;
+    font-size: 12px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: #f4f6f8;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Export Button */
+.export-btn {
+    margin-top: auto;
+    background: #2e7d32;
+}
+
+.export-btn:hover {
+    background: #1b5e20;
+}
+
+/* Secondary Button */
+.secondary-btn {
+    margin-top: 10px;
+    background: #607d8b;
+}
+
+.secondary-btn:hover {
+    background: #455a64;
+}
+
+/* Status Text */
+.status-text {
+    margin: 8px 0;
+    color: #666;
+    font-size: 12px;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+/* Large monitors */
+@media (min-width: 1600px) {
+    .top-header,
+    .dashboard-grid { max-width: 1560px; }
+    .dashboard-grid { gap: 28px; }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .top-header { flex-wrap: wrap; }
+    .header-actions { width: 100%; justify-content: flex-end; }
+}
+
+/* Phone */
+@media (max-width: 600px) {
+    body { padding: 12px; }
+    .top-header { margin-bottom: 14px; padding: 14px 14px 14px 18px; gap: 12px; }
+    .brand-badge { width: 42px; height: 42px; font-size: 12px; border-radius: 11px; }
+    .header-text h1 { font-size: 1.05rem; }
+    .header-eyebrow { font-size: 0.62rem; letter-spacing: .8px; }
+    .header-actions { justify-content: space-between; }
+    .back-link { font-size: 0.8rem; padding: 7px 12px; }
+    .status-chip { font-size: 0.72rem; padding: 6px 10px; }
+    .card { padding: 16px; min-height: 0; }
+}
+
+@media (max-width: 360px) {
+    .header-text h1 { font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="top-header">
+    <div class="brand-badge" aria-hidden="true">JDE<span>&#10003;</span></div>
+    <div class="header-text">
+        <span class="header-eyebrow">Oracle JD Edwards EnterpriseOne 9.2 &middot; Purchase Orders</span>
+        <h1>JDE Purchase Order Dashboard</h1>
+    </div>
+    <div class="header-actions">
+        <span class="status-chip"><i></i>Orchestrator &middot; Live</span>
+        <a href="/index.html" class="back-link">&larr; Back to Dashboard</a>
+    </div>
+</header>
+
+<div class="dashboard-grid">
+
+  <!-- Column 1: Purchase Order Entry -->
+  <div class="card">
+    <div class="card-header-row"><h2 class="card-title">Purchase Order Entry</h2></div>
+
+    <form id="purchaseOrderForm">
+      <label for="Branch_Plant1">Branch Plant</label>
+      <input id="Branch_Plant1" value="M30" required>
+
+      <label for="Long_Address_Number_ALKY1">Long Address Number</label>
+      <input id="Long_Address_Number_ALKY1" value="9007" required>
+
+      <label for="Long_Ship_To_ALKY1">Long Ship To</label>
+      <input id="Long_Ship_To_ALKY1" value="8920" required>
+
+      <label for="Long_Buyer_Address_Number1">Long Buyer Address Number</label>
+      <input id="Long_Buyer_Address_Number1" value="8920" required>
+
+      <label for="Quantity_Ordered1">Quantity Ordered</label>
+      <input id="Quantity_Ordered1" type="number" min="0.01" step="any" value="100" required>
+
+      <label for="Item_Number1">Item Number</label>
+      <input id="Item_Number1" value="210" required>
+
+      <label for="Unit_Cost1">Unit Cost</label>
+      <input id="Unit_Cost1" type="number" min="0" step="any" value="210" required>
+
+      <label for="Account_Number1">Account Number (keep leading spaces)</label>
+      <input id="Account_Number1" value="1.1110.CITI" required>
+
+      <label for="selectRow1">Select Row</label>
+      <input id="selectRow1" value="1" required>
+
+      <label for="P4310_Version1">P4310 Version (optional)</label>
+      <input id="P4310_Version1" value="">
+
+      <button id="submitButton" type="submit">Create Purchase Order</button>
+    </form>
+
+    <div id="result" role="status" aria-live="polite">Ready. Create a purchase order to visualize the graph.</div>
+  </div>
+
+  <!-- Column 2: Graph -->
+  <div class="card">
+    <div class="card-header-row">
+      <h2 class="card-title" id="chartTitle">Purchase Graph (Pie Chart)</h2>
+      <button type="button" class="toggle-btn" id="toggleChartBtn">Switch to Bar Chart</button>
+    </div>
+    <div class="chart-container"><canvas id="purchaseChart">Purchase graph</canvas></div>
+    <div class="legend-container" id="chartLegend"></div>
+    <p class="status-text" id="graphSummary">Total Purchase: ₹0.00 | Orders: 0</p>
+  </div>
+
+  <!-- Column 3: Reports -->
+  <div class="card">
+    <div class="card-header-row"><h2 class="card-title">Purchase Details Export</h2></div>
+    <div class="report-list" id="reportList"></div>
+    <p class="status-text" id="historyStatus">Dashboard ready.</p>
+    <button class="export-btn" id="exportButton" type="button">Export Report (CSV)</button>
+    <button class="secondary-btn" id="refreshButton" type="button">Clear Local Logs</button>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+const CREATE_URL = "/purchase-order/create";
+
+const form = document.getElementById("purchaseOrderForm");
+const button = document.getElementById("submitButton");
+const result = document.getElementById("result");
+const reportList = document.getElementById("reportList");
+const exportButton = document.getElementById("exportButton");
+const refreshButton = document.getElementById("refreshButton");
+const historyStatus = document.getElementById("historyStatus");
+const graphSummary = document.getElementById("graphSummary");
+const canvas = document.getElementById("purchaseChart");
+const chartLegend = document.getElementById("chartLegend");
+const toggleChartBtn = document.getElementById("toggleChartBtn");
+const chartTitle = document.getElementById("chartTitle");
+
+const colorPalette = [
+  "#1769aa", "#2e7d32", "#ed6c02", "#9c27b0",
+  "#0288d1", "#d32f2f", "#7b1fa2", "#388e3c",
+  "#f57c00", "#455a64", "#e91e63", "#00bcd4",
+  "#8bc34a", "#ff9800", "#673ab7", "#009688"
+];
+
+let currentChartType = "PIE";
+let orderHistory = [];
+
+const moneyFormatter = new Intl.NumberFormat("en-IN", {
+  style: "currency", currency: "INR", maximumFractionDigits: 2
+});
+
+function money(value) { return moneyFormatter.format(Number(value) || 0); }
+
+function getInput(id) { return document.getElementById(id).value.trim(); }
+
+// No trim: keeps leading spaces (needed for the JDE account value)
+function getRawInput(id) { return document.getElementById(id).value; }
+
+function firstValue(object, keys, fallback = "") {
+  for (const key of keys) {
+    if (object && object[key] !== undefined && object[key] !== null && object[key] !== "") {
+      const value = object[key];
+      return typeof value === "object" && value.value !== undefined ? value.value : value;
+    }
+  }
+  return fallback;
+}
+
+function mapPurchaseEntry(entry, fallbackInputs = {}) {
+
+  let targetData = entry;
+
+  if (entry && entry.jdeResponse) {
+    // Order number/type are returned in the "Order Header" form (fs_P4310_W4310B),
+    // in the last form that actually has z_LDOC_91 filled in.
+    const forms = entry.jdeResponse.ServiceRequest1?.forms || [];
+    let headerData = null;
+
+    for (const f of forms) {
+      for (const key of Object.keys(f)) {
+        if (key.startsWith("fs_") && f[key]?.data?.z_LDOC_91 !== undefined) {
+          headerData = f[key].data;
+        }
+      }
+    }
+
+    if (headerData) { targetData = headerData; }
+  } else if (entry && entry.data) {
+    targetData = entry.data;
+  }
+
+  // Quantity / unit cost / item / account come from what the user entered
+  // (JDE does not return them); order number/type come from the JDE response
+  const qty = Number(firstValue(targetData, ["qty", "Quantity_Ordered", "Quantity_Ordered1", "quantityOrdered", "quantity"], fallbackInputs.quantity || 0));
+  const price = Number(firstValue(targetData, ["price", "Unit_Cost", "Unit_Cost1", "unitCost"], fallbackInputs.unitCost || 0));
+  const suppliedTotal = firstValue(targetData, ["total", "Total_Value", "totalValue", "extendedPrice"], null);
+  const total = suppliedTotal === null ? qty * price : Number(suppliedTotal);
+
+  const orderNumber = firstValue(targetData, ["z_LDOC_91", "orderNumber", "Order_Number", "orderNo", "DOCO"], fallbackInputs.orderNumber || "Pending");
+  const orderType = firstValue(targetData, ["z_DCTO_101", "orderType", "DCTO"], fallbackInputs.orderType || "OP");
+  const item = firstValue(targetData, ["item", "Item_Number", "Item_Number1", "itemNumber", "Short_Item_Number"], fallbackInputs.item || "");
+
+  return {
+    orderNumber: String(orderNumber),
+    orderType: String(orderType),
+    item: String(item),
+    qty: qty,
+    price: price,
+    accountNumber: String(firstValue(targetData, ["Account_Number", "Account_Number1", "accountNumber"], fallbackInputs.accountNumber || "")).trim(),
+    total: total,
+    date: String(firstValue(targetData, ["date", "Order_Date", "orderDate", "createdAt", "time"],
+      (entry && entry.jdeResponse && entry.jdeResponse.jde__endTimestamp) || new Date().toLocaleString())),
+    businessUnit: String(firstValue(targetData, ["businessUnit", "Business_Unit", "Branch_Plant", "Branch_Plant1"], fallbackInputs.businessUnit || ""))
+  };
+}
+
+/* =========================
+   CHART FUNCTIONS
+========================= */
+
+function drawChart() {
+
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) { return; }
+
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const width = rect.width;
+  const height = rect.height;
+
+  ctx.clearRect(0, 0, width, height);
+  chartLegend.innerHTML = "";
+
+  const totalPurchase = orderHistory.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+  graphSummary.textContent = "Total Purchase: " + money(totalPurchase) + " | Orders: " + orderHistory.length;
+
+  if (orderHistory.length === 0) {
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#666";
+    ctx.font = "12px Arial";
+    ctx.fillText("Create a purchase order to view the graph", width / 2, height / 2);
+    return;
+  }
+
+  if (currentChartType === "PIE") {
+    drawPieChart(ctx, width, height, totalPurchase);
+  } else {
+    drawBarChart(ctx, width, height);
+  }
+}
+
+function drawPieChart(ctx, width, height, grandTotal) {
+
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const radius = Math.min(centerX, centerY) - 20;
+
+  let startAngle = -0.5 * Math.PI;
+
+  orderHistory.forEach((order, index) => {
+
+    const value = Number(order.total) || 0;
+    const sliceAngle = grandTotal > 0 ? (value / grandTotal) * (2 * Math.PI) : 0;
+    const color = colorPalette[index % colorPalette.length];
+
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+
+    if (sliceAngle > 0.15) {
+      const midAngle = startAngle + sliceAngle / 2;
+      const textX = centerX + Math.cos(midAngle) * radius * 0.65;
+      const textY = centerY + Math.sin(midAngle) * radius * 0.65;
+      const percentage = Math.round((value / grandTotal) * 100) + "%";
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(percentage, textX, textY);
+    }
+
+    startAngle += sliceAngle;
+
+    const legendItem = document.createElement("div");
+    legendItem.className = "legend-item";
+
+    const legendColor = document.createElement("div");
+    legendColor.className = "legend-color";
+    legendColor.style.background = color;
+
+    const legendText = document.createElement("span");
+    legendText.textContent =
+      "#" + (order.item || "N/A") + " | Order: " + (order.orderNumber || "N/A") + " | " + money(value);
+
+    legendItem.appendChild(legendColor);
+    legendItem.appendChild(legendText);
+    chartLegend.appendChild(legendItem);
+  });
+}
+
+function drawBarChart(ctx, width, height) {
+
+  const padding = { left: 58, right: 15, top: 25, bottom: 40 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const maxTotal = Math.max(...orderHistory.map(o => Number(o.total) || 0), 1);
+
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#ddd";
+  ctx.font = "10px Arial";
+
+  for (let i = 0; i <= 4; i++) {
+    const y = padding.top + (chartHeight * i / 4);
+    ctx.beginPath();
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(width - padding.right, y);
+    ctx.stroke();
+
+    const value = maxTotal * (1 - i / 4);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#555";
+    ctx.fillText(Math.round(value).toLocaleString("en-IN"), padding.left - 6, y + 4);
+  }
+
+  const spacing = chartWidth / orderHistory.length;
+  const barWidth = Math.max(2, Math.min(45, spacing * 0.6));
+
+  orderHistory.forEach((order, index) => {
+
+    const orderTotal = Number(order.total) || 0;
+    const barHeight = (orderTotal / maxTotal) * chartHeight;
+    const x = padding.left + (index * spacing) + (spacing - barWidth) / 2;
+    const y = padding.top + chartHeight - barHeight;
+
+    ctx.fillStyle = colorPalette[index % colorPalette.length];
+    ctx.fillRect(x, y, barWidth, barHeight);
+
+    ctx.fillStyle = "#333";
+    ctx.textAlign = "center";
+    ctx.fillText("₹" + Math.round(orderTotal).toLocaleString("en-IN"), x + barWidth / 2, Math.max(12, y - 5));
+
+    const label = "#" + (order.item || order.orderNumber || "N/A");
+    ctx.fillText(label.substring(0, 10), x + barWidth / 2, padding.top + chartHeight + 15);
+  });
+}
+
+/* =========================
+   TOGGLE CHART
+========================= */
+
+toggleChartBtn.addEventListener("click", () => {
+  if (currentChartType === "PIE") {
+    currentChartType = "BAR";
+    chartTitle.textContent = "Purchase Graph (Bar Chart)";
+    toggleChartBtn.textContent = "Switch to Pie Chart";
+  } else {
+    currentChartType = "PIE";
+    chartTitle.textContent = "Purchase Graph (Pie Chart)";
+    toggleChartBtn.textContent = "Switch to Bar Chart";
+  }
+  drawChart();
+});
+
+/* =========================
+   REPORT PANEL
+========================= */
+
+function refreshReportPanel() {
+
+  reportList.replaceChildren();
+
+  if (orderHistory.length === 0) {
+    const message = document.createElement("p");
+    message.className = "status-text";
+    message.textContent = "No purchase entries available.";
+    reportList.appendChild(message);
+    return;
+  }
+
+  orderHistory.slice().reverse().forEach((order, index) => {
+
+    const card = document.createElement("div");
+    card.className = "report-item";
+
+    const originalIndex = orderHistory.length - 1 - index;
+    card.style.borderLeftColor = colorPalette[originalIndex % colorPalette.length];
+
+    const fields = [
+      ["Order Number", order.orderNumber || "N/A"],
+      ["Order Type", order.orderType || "N/A"],
+      ["Branch Plant", order.businessUnit || "N/A"],
+      ["Item Number", order.item || "N/A"],
+      ["Quantity", order.qty],
+      ["Account Number", order.accountNumber || "N/A"],
+      ["Unit Cost", money(order.price)],
+      ["Total Value", money(order.total)],
+      ["Date", order.date || "N/A"]
+    ];
+
+    fields.forEach(([label, value]) => {
+      const line = document.createElement("div");
+      const strong = document.createElement("strong");
+      strong.textContent = label + ": ";
+      line.appendChild(strong);
+      line.appendChild(document.createTextNode(String(value)));
+      if (label === "Total Value") { line.className = "total-value"; }
+      card.appendChild(line);
+    });
+
+    reportList.appendChild(card);
+  });
+}
+
+function refreshDashboard() {
+  refreshReportPanel();
+  drawChart();
+  historyStatus.textContent = orderHistory.length + " purchase record(s) currently displayed.";
+}
+
+/* =========================
+   JDE RESPONSE CHECK
+========================= */
+
+function getJdeProblem(data) {
+  if (!data || typeof data !== "object") { return null; }
+  if (data.success === false) { return data.error || "Request failed."; }
+
+  const jde = data.jdeResponse;
+  if (!jde) { return null; }
+
+  if (jde.jde__status && jde.jde__status !== "SUCCESS") {
+    return "JDE status: " + jde.jde__status;
+  }
+
+  const forms = jde.ServiceRequest1?.forms || [];
+  const messages = [];
+  for (const f of forms) {
+    for (const key of Object.keys(f)) {
+      const part = f[key];
+      if (key.startsWith("fs_") && part) {
+        (part.errors || []).forEach(e => messages.push(e.TITLE || e.title || e.CODE || JSON.stringify(e)));
+      }
+    }
+    (f.sysErrors || []).forEach(e => messages.push(JSON.stringify(e)));
+  }
+  return messages.length ? messages.join("; ") : null;
+}
+
+/* =========================
+   CREATE PURCHASE ORDER
+========================= */
+
+form.addEventListener("submit", async function (event) {
+
+  event.preventDefault();
+
+  const branchPlant = getInput("Branch_Plant1");
+  const addressNumber = getInput("Long_Address_Number_ALKY1");
+  const shipTo = getInput("Long_Ship_To_ALKY1");
+  const buyerAddress = getInput("Long_Buyer_Address_Number1");
+  const quantity = Number(getInput("Quantity_Ordered1"));
+  const itemNumber = getInput("Item_Number1");
+  const unitCost = Number(getInput("Unit_Cost1"));
+  const accountNumber = getRawInput("Account_Number1");   // keep leading spaces
+  const selectRow = getInput("selectRow1");
+  const p4310Version = getInput("P4310_Version1");
+
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    result.textContent = "Quantity must be greater than zero.";
+    return;
+  }
+
+  if (!Number.isFinite(unitCost) || unitCost < 0) {
+    result.textContent = "Enter a valid unit cost.";
+    return;
+  }
+
+  /* Payload sent to Spring Boot (service maps it to the JDE field names) */
+  const payload = {
+    Branch_Plant1: branchPlant,
+    Long_Address_Number_ALKY1: addressNumber,
+    Long_Ship_To_ALKY1: shipTo,
+    Long_Buyer_Address_Number1: buyerAddress,
+    Quantity_Ordered1: quantity,
+    Item_Number1: itemNumber,
+    Unit_Cost1: unitCost,
+    Account_Number1: accountNumber,
+    Select_Row1: selectRow,
+    P4310_Version1: p4310Version
+  };
+
+  button.disabled = true;
+  result.textContent = "Sending purchase order to JDE...";
+
+  try {
+
+    const response = await fetch(CREATE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const responseText = await response.text();
+
+    let data;
+    try { data = JSON.parse(responseText); } catch { data = responseText; }
+
+    result.textContent =
+      "HTTP Status: " + response.status + "\n\n" +
+      (typeof data === "string" ? data : JSON.stringify(data, null, 2));
+
+    if (!response.ok) {
+      throw new Error("Purchase order request failed with HTTP " + response.status);
+    }
+
+    const jdeProblem = getJdeProblem(data);
+    if (jdeProblem) {
+      throw new Error(jdeProblem);
+    }
+
+    const newOrder = mapPurchaseEntry(data, {
+      quantity: quantity,
+      unitCost: unitCost,
+      businessUnit: branchPlant,
+      accountNumber: accountNumber,
+      item: itemNumber
+    });
+
+    orderHistory.push(newOrder);
+    refreshDashboard();
+
+    result.textContent += "\n\nPurchase order successfully added to the dashboard.";
+
+  } catch (error) {
+    result.textContent += "\n\nError: " + error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+/* =========================
+   CSV EXPORT
+========================= */
+
+function escapeCSV(value) {
+  let text = String(value ?? "");
+  if (/^[\s]*[=+\-@]/.test(text)) { text = "'" + text; }
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+
+exportButton.addEventListener("click", function () {
+
+  if (orderHistory.length === 0) {
+    alert("No purchase entries available to export.");
+    return;
+  }
+
+  const headers = ["Order Number", "Order Type", "Branch Plant", "Item Number", "Quantity", "Account Number", "Unit Cost", "Total Value", "Date"];
+
+  const rows = orderHistory.map(o => [
+    o.orderNumber, o.orderType, o.businessUnit, o.item, o.qty, o.accountNumber, o.price, o.total, o.date
+  ]);
+
+  const csvContent = [
+    headers.map(escapeCSV).join(","),
+    ...rows.map(row => row.map(escapeCSV).join(","))
+  ].join("\r\n");
+
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "JDE_Purchase_Orders_" + Date.now() + ".csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+/* =========================
+   CLEAR HISTORY
+========================= */
+
+refreshButton.addEventListener("click", function () {
+  orderHistory = [];
+  refreshDashboard();
+  historyStatus.textContent = "Local history cleared.";
+});
+
+/* =========================
+   INITIALIZE
+========================= */
+
+window.addEventListener("load", refreshDashboard);
+window.addEventListener("resize", drawChart);
+</script>
+
+</body>
+</html>

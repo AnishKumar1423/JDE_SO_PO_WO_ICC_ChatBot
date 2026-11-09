@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Register | JD Edwards EnterpriseOne Dashboard</title>
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background: #f1f4f8;
+    color: #263238;
+}
+
+.header {
+    background: linear-gradient(135deg, #123b65, #1769aa);
+    color: white;
+    padding: 18px 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.15);
+    position: relative;
+    text-align: center;
+}
+.header h1 { margin: 0; font-size: 22px; }
+.header-logo { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); display: flex; }
+.header-logo img { height: 44px; width: auto; border-radius: 50%; }
+
+.main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 30px 20px; }
+
+.card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 12px;
+    border-top: 5px solid #1769aa;
+    box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    padding: 26px 28px 30px;
+}
+
+.tabs { display: flex; border-bottom: 2px solid #f1f4f8; margin-bottom: 20px; }
+.tab {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    color: #64748b;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.tab:hover { color: #174a7e; }
+.tab[aria-selected="true"] { color: #1769aa; border-bottom-color: #1769aa; }
+
+.panel[hidden] { display: none; }
+
+h2 { margin: 0 0 4px; color: #174a7e; text-align: center; font-size: 22px; }
+.subtitle { margin: 0 0 8px; text-align: center; color: #64748b; font-size: 14px; }
+
+label { display: block; margin-top: 14px; font-size: 13px; font-weight: bold; color: #333; }
+
+input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 5px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 14px;
+}
+input:focus { outline: none; border-color: #1769aa; box-shadow: 0 0 0 2px rgba(23,105,170,.2); }
+
+.password-wrap { position: relative; }
+.password-wrap input { padding-right: 62px; }
+.toggle-pw {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: 2px;
+    padding: 5px 8px;
+    background: none;
+    border: none;
+    color: #1769aa;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.hint { margin: 4px 0 0; font-size: 12px; color: #64748b; }
+
+.btn {
+    display: block;
+    width: 100%;
+    margin-top: 22px;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background: #1769aa;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .2s;
+}
+.btn:hover { background: #104c7d; }
+.btn:disabled { opacity: .6; cursor: wait; }
+.btn.danger { background: #c62828; }
+.btn.danger:hover { background: #a31f1f; }
+.btn.secondary { background: #607d8b; margin-top: 10px; }
+.btn.secondary:hover { background: #455a64; }
+
+#message { display: none; margin-top: 16px; padding: 10px 12px; border-radius: 6px; font-size: 13px; overflow-wrap: anywhere; }
+#message.error { display: block; background: #fdecea; color: #b71c1c; border: 1px solid #f5c6c2; }
+#message.ok    { display: block; background: #e8f5e9; color: #1b5e20; border: 1px solid #c3e6c5; }
+
+.account-user {
+    margin: 18px 0 4px;
+    padding: 14px;
+    text-align: center;
+    background: #f8fafc;
+    border-left: 4px solid #1769aa;
+    border-radius: 0 6px 6px 0;
+    font-size: 15px;
+    color: #174a7e;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.links { margin-top: 20px; text-align: center; font-size: 13px; }
+.links a { color: #1769aa; font-weight: bold; text-decoration: none; }
+.links a:hover { text-decoration: underline; }
+
+.footer { text-align: center; padding: 16px; color: #64748b; font-size: 13px; background: white; }
+
+@media (max-width: 600px) {
+    .header { padding: 14px 12px 14px 70px; text-align: left; }
+    .header h1 { font-size: 17px; }
+    .header-logo { left: 12px; }
+    .card { padding: 20px 18px 24px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+    <a href="/index.html" class="header-logo"><img src="logo1.png" alt="Company Logo"></a>
+    <h1>JD Edwards EnterpriseOne Dashboard</h1>
+</header>
+
+<main class="main">
+    <div class="card">
+
+        <div class="tabs" role="tablist" id="tabs">
+            <button type="button" class="tab" role="tab" id="tabLogin" aria-controls="panelLogin" aria-selected="true">Login</button>
+            <button type="button" class="tab" role="tab" id="tabRegister" aria-controls="panelRegister" aria-selected="false">Register</button>
+        </div>
+
+        <!-- LOGIN -->
+        <section class="panel" id="panelLogin" role="tabpanel" aria-labelledby="tabLogin">
+            <h2>Login</h2>
+            <p class="subtitle">Sign in to continue to the dashboard</p>
+
+            <form id="loginForm" novalidate>
+                <label for="loginUsername">Username</label>
+                <input id="loginUsername" type="text" autocomplete="username" required>
+
+                <label for="loginPassword">Password</label>
+                <div class="password-wrap">
+                    <input id="loginPassword" type="password" autocomplete="current-password" required>
+                    <button type="button" class="toggle-pw" data-target="loginPassword" aria-label="Show password">Show</button>
+                </div>
+
+                <button type="submit" class="btn" id="loginBtn">Login</button>
+            </form>
+        </section>
+
+        <!-- REGISTER -->
+        <section class="panel" id="panelRegister" role="tabpanel" aria-labelledby="tabRegister" hidden>
+            <h2>Create Account</h2>
+            <p class="subtitle">Register to access the dashboard</p>
+
+            <form id="registerForm" novalidate>
+                <label for="regUsername">Username</label>
+                <input id="regUsername" type="text" autocomplete="username" required>
+
+                <label for="regEmail">Email</label>
+                <input id="regEmail" type="email" autocomplete="email" required>
+
+                <label for="regPassword">Password</label>
+                <div class="password-wrap">
+                    <input id="regPassword" type="password" autocomplete="new-password" required>
+                    <button type="button" class="toggle-pw" data-target="regPassword" aria-label="Show password">Show</button>
+                </div>
+                <p class="hint">At least 8 characters.</p>
+
+                <label for="regConfirm">Confirm Password</label>
+                <input id="regConfirm" type="password" autocomplete="new-password" required>
+
+                <button type="submit" class="btn" id="registerBtn">Register</button>
+            </form>
+        </section>
+
+        <!-- LOGOUT (shown when signed in) -->
+        <section class="panel" id="panelAccount" hidden>
+            <h2>Account</h2>
+            <p class="subtitle">You are currently signed in</p>
+            <div class="account-user" id="accountUser"></div>
+            <a class="btn" href="/index.html">Go to Dashboard</a>
+            <button type="button" class="btn danger" id="logoutBtn">Logout</button>
+        </section>
+
+        <div id="message" role="alert" aria-live="polite"></div>
+
+        <div class="links"><a href="/index.html">← Back to Dashboard</a></div>
+    </div>
+</main>
+
+<footer class="footer">
+    Anish Kumar | JD Edwards EnterpriseOne | Full Stack Developer(JAVA SpringBoot) | Mobile Apps Developer(Flutter)
+</footer>
+
+<script>
+"use strict";
+
+// Spring Boot endpoints (change to match your controller)
+const LOGIN_URL    = "/auth/login";     // POST {username, password}            -> 200 (optional {"username": "..."})
+const REGISTER_URL = "/auth/register";  // POST {username, email, password}     -> 200/201
+const LOGOUT_URL   = "/auth/logout";    // POST (best effort; session is cleared locally either way)
+const HOME_URL     = "/index.html";
+const USER_KEY     = "jdeUser";         // the dashboard reads this key
+
+const tabs = document.getElementById("tabs");
+const tabLogin = document.getElementById("tabLogin");
+const tabRegister = document.getElementById("tabRegister");
+const panelLogin = document.getElementById("panelLogin");
+const panelRegister = document.getElementById("panelRegister");
+const panelAccount = document.getElementById("panelAccount");
+const accountUser = document.getElementById("accountUser");
+const message = document.getElementById("message");
+
+function getUser() {
+    try { return sessionStorage.getItem(USER_KEY); } catch (e) { return null; }
+}
+function setUser(name) {
+    try { sessionStorage.setItem(USER_KEY, name); } catch (e) { /* ignore */ }
+}
+function clearUser() {
+    try { sessionStorage.removeItem(USER_KEY); } catch (e) { /* ignore */ }
+}
+
+function showMessage(type, text) {
+    message.className = type || "";
+    message.textContent = text || "";
+}
+
+async function readJson(response) {
+    try { return await response.json(); } catch (e) { return null; }
+}
+
+function errorText(response, data, fallback401) {
+    return (data && (data.error || data.message)) ||
+        (response.status === 401 && fallback401 ? fallback401 : "Request failed (HTTP " + response.status + ").");
+}
+
+/* ---------- View switching (Login / Register / Account) ---------- */
+function render() {
+    const user = getUser();
+
+    if (user) {
+        tabs.hidden = true;
+        panelLogin.hidden = true;
+        panelRegister.hidden = true;
+        panelAccount.hidden = false;
+        accountUser.textContent = "Signed in as " + user;
+        return;
+    }
+
+    const showRegister = location.hash === "#register";
+    tabs.hidden = false;
+    panelAccount.hidden = true;
+    panelLogin.hidden = showRegister;
+    panelRegister.hidden = !showRegister;
+    tabLogin.setAttribute("aria-selected", String(!showRegister));
+    tabRegister.setAttribute("aria-selected", String(showRegister));
+}
+
+function go(hash) {
+    showMessage("", "");
+    if (location.hash === hash) { render(); } else { location.hash = hash; }
+}
+
+tabLogin.addEventListener("click", () => go("#login"));
+tabRegister.addEventListener("click", () => go("#register"));
+window.addEventListener("hashchange", render);
+
+document.querySelectorAll(".toggle-pw").forEach(function (b) {
+    b.addEventListener("click", function () {
+        const input = document.getElementById(b.dataset.target);
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        b.textContent = show ? "Hide" : "Show";
+        b.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    });
+});
+
+/* ---------- Login ---------- */
+document.getElementById("loginForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const btn = document.getElementById("loginBtn");
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    if (!username || !password) {
+        showMessage("error", "Please enter your username and password.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Signing in...";
+    showMessage("", "");
+
+    try {
+        const response = await fetch(LOGIN_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify({ username: username, password: password })
+        });
+        const data = await readJson(response);
+
+        if (!response.ok) {
+            showMessage("error", errorText(response, data, "Invalid username or password."));
+            return;
+        }
+
+        setUser((data && data.username) || username);
+        showMessage("ok", "Login successful. Redirecting...");
+        window.location.href = HOME_URL;
+
+    } catch (error) {
+        showMessage("error", "Cannot reach the server. Please try again.");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Login";
+    }
+});
+
+/* ---------- Register ---------- */
+document.getElementById("registerForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const btn = document.getElementById("registerBtn");
+    const username = document.getElementById("regUsername").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value;
+    const confirm = document.getElementById("regConfirm").value;
+
+    if (!username || !email || !password || !confirm) {
+        showMessage("error", "Please fill in all fields.");
+        return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showMessage("error", "Enter a valid email address.");
+        return;
+    }
+    if (password.length < 8) {
+        showMessage("error", "Password must be at least 8 characters.");
+        return;
+    }
+    if (password !== confirm) {
+        showMessage("error", "Passwords do not match.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Registering...";
+    showMessage("", "");
+
+    try {
+        const response = await fetch(REGISTER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify({ username: username, email: email, password: password })
+        });
+        const data = await readJson(response);
+
+        if (!response.ok) {
+            showMessage("error", errorText(response, data, null));
+            return;
+        }
+
+        document.getElementById("registerForm").reset();
+        document.getElementById("loginUsername").value = username;
+        go("#login");
+        showMessage("ok", "Registration successful. Please log in.");
+
+    } catch (error) {
+        showMessage("error", "Cannot reach the server. Please try again.");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Register";
+    }
+});
+
+/* ---------- Logout ---------- */
+document.getElementById("logoutBtn").addEventListener("click", async function () {
+    const btn = this;
+    btn.disabled = true;
+
+    try {
+        await fetch(LOGOUT_URL, { method: "POST", headers: { "Accept": "application/json" } });
+    } catch (e) { /* ignore: local session is cleared anyway */ }
+
+    clearUser();
+    btn.disabled = false;
+    location.hash = "#login";
+    render();
+    showMessage("ok", "You have been logged out.");
+});
+
+render();
+</script>
+
+</body>
+</html>

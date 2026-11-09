@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JD Edwards EnterpriseOne Dashboard</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f4f8;
+            color: #263238;
+        }
+
+        /* ---------- Header ---------- */
+        .header {
+            background: linear-gradient(135deg, #123b65, #1769aa);
+            color: white;
+            padding: 25px 20px;
+            box-shadow: 0 3px 12px rgba(0,0,0,.15);
+            position: relative;
+            z-index: 50;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            min-height: 55px;
+        }
+
+        .header-logo {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+        }
+
+        .header-logo img {
+            height: 55px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        .header-title-container { text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; }
+
+        /* ---------- Login dropdown (far right) ---------- */
+        .login-menu {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .login-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            background: rgba(255,255,255,.14);
+            color: white;
+            border: 1px solid rgba(255,255,255,.4);
+            border-radius: 22px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .login-btn:hover,
+        .login-btn[aria-expanded="true"] { background: rgba(255,255,255,.26); }
+
+        .login-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+        .login-btn .caret { font-size: 10px; transition: transform .2s; }
+        .login-btn[aria-expanded="true"] .caret { transform: rotate(180deg); }
+
+        .login-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            min-width: 180px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.22);
+            padding: 6px;
+            list-style: none;
+            margin: 0;
+        }
+
+        .login-dropdown.open { display: block; }
+
+        .login-dropdown a,
+        .login-dropdown button.menu-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            background: none;
+            border: none;
+            border-radius: 6px;
+            color: #174a7e;
+            font-size: 14px;
+            font-family: inherit;
+            text-decoration: none;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .login-dropdown a:hover,
+        .login-dropdown button.menu-link:hover { background: #e8f0fe; }
+
+        .login-dropdown .divider { height: 1px; background: #e5eaf0; margin: 4px 0; }
+
+        .login-dropdown [hidden] { display: none !important; }
+
+        .user-label {
+            padding: 8px 12px 6px;
+            font-size: 12px;
+            color: #64748b;
+            border-bottom: 1px solid #e5eaf0;
+            margin-bottom: 4px;
+        }
+
+        /* ---------- 3 column layout: Integration | Main | Module ---------- */
+        .layout {
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr) 280px;
+            gap: 24px;
+            max-width: 1800px;
+            margin: 35px auto;
+            padding: 0 20px;
+            align-items: start;
+        }
+
+        .side-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,.08);
+            border-top: 5px solid #1769aa;
+            position: sticky;
+            top: 20px;
+        }
+
+        .side-title {
+            margin: 0 0 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f4f8;
+            color: #174a7e;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .side-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .side-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-left: 4px solid #1769aa;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+            color: #263238;
+            text-decoration: none;
+            transition: background .2s, transform .2s;
+        }
+
+        a.side-item:hover {
+            background: #e8f0fe;
+            transform: translateX(3px);
+        }
+
+        .side-item .tag {
+            font-weight: bold;
+            color: #174a7e;
+            min-width: 46px;
+        }
+
+        .side-item .desc { color: #64748b; font-size: 12px; }
+
+        /* ---------- Center ---------- */
+        .section-title {
+            color: #174a7e;
+            text-align: center;
+            margin: 0 0 25px;
+        }
+
+        .section-title.spaced { margin-top: 35px; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,.08);
+            border-top: 5px solid #1769aa;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 9px 22px rgba(0,0,0,.13);
+        }
+
+        .module-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .module-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: #e8f0fe;
+            color: #1769aa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 29px;
+            flex-shrink: 0;
+        }
+
+        .module-card h3 { color: #174a7e; margin: 0 0 7px; font-size: 19px; }
+        .module-card p  { color: #64748b; line-height: 1.6; font-size: 14px; margin: 0; }
+
+        .open-btn {
+            display: block;
+            text-decoration: none;
+            text-align: center;
+            background: #1769aa;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background .2s;
+        }
+
+        .open-btn:hover { background: #104c7d; }
+
+        .footer {
+            text-align: center;
+            padding: 22px;
+            margin-top: 35px;
+            color: #64748b;
+            font-size: 13px;
+            background: white;
+        }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 1200px) {
+            .layout { grid-template-columns: 1fr; }
+            .side-panel { position: static; }
+            .center { order: -1; }
+        }
+
+        @media (max-width: 700px) {
+            .header-content { flex-direction: column; gap: 15px; }
+            .header-logo,
+            .login-menu { position: static; transform: none; }
+            .login-dropdown { right: auto; left: 50%; transform: translateX(-50%); }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 23px; }
+            .module-card { padding: 20px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="header-content">
+        <a href="#" class="header-logo">
+            <img src="images/logo1.png" alt="Company Logo">
+        </a>
+
+        <div class="header-title-container">
+            <h1>JD Edwards EnterpriseOne Dashboard</h1>
+        </div>
+
+        <!-- Login dropdown -->
+        <div class="login-menu" id="loginMenu">
+            <button type="button" class="login-btn" id="loginBtn"
+                    aria-haspopup="true" aria-expanded="false" aria-controls="loginDropdown">
+                <span id="loginBtnText">Log in</span> <span class="caret">▼</span>
+            </button>
+
+            <ul class="login-dropdown" id="loginDropdown">
+                <li class="user-label" id="userLabel" hidden></li>
+                <li id="registerItem"><a href="/login_register_logout.html#register">📝 Register</a></li>
+                <li id="loginItem"><a href="/login_register_logout.html#login">🔑 Login</a></li>
+                <li class="divider"></li>
+                <li id="logoutItem" hidden><button type="button" class="menu-link" id="logoutBtn">🚪 Logout</button></li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<div class="layout">
+
+    <!-- LEFT: JDE Integration -->
+    <aside class="side-panel">
+        <h2 class="side-title">JDE Integration</h2>
+        <ul class="side-list">
+            <li class="side-item"><span class="tag">BSSV</span><span class="desc">Business Services</span></li>
+            <li class="side-item"><span class="tag">ORCH</span><span class="desc">Orchestrator</span></li>
+            <li class="side-item"><span class="tag">FDA</span><span class="desc">Form Data Access</span></li>
+            <li class="side-item"><span class="tag">RDA</span><span class="desc">Report Data Access</span></li>
+            <li class="side-item"><span class="tag">NER</span><span class="desc">Named Event Rules</span></li>
+            <li class="side-item"><span class="tag">BSFN</span><span class="desc">Business Functions</span></li>
+            <li class="side-item"><span class="tag">BIP</span><span class="desc">BI Publisher</span></li>
+            <li class="side-item"><span class="tag">REST</span><span class="desc">REST APIs</span></li>
+            <li class="side-item"><span class="tag">SOAP</span><span class="desc">SOAP APIs</span></li>
+        </ul>
+    </aside>
+
+    <!-- CENTER: Main content -->
+    <main class="center">
+        <h2 class="section-title">JDE EnterpriseOne Applications Operations</h2>
+
+        <div class="dashboard-grid">
+
+            <section class="module-card">
+                <div class="module-top">
+                    <div class="module-icon">🛒</div>
+                    <div>
+                        <h3>JDE Sales Order Create</h3>
+                        <p>Create sales orders and review order details.</p>
+                    </div>
+                </div>
+                <a class="open-btn" href="/salesOrder.html">Open Sales Order →</a>
+            </section>
+
+            <section class="module-card">
+                <div class="module-top">
+                    <div class="module-icon">📦</div>
+                    <div>
+                        <h3>JDE Purchase Order Create</h3>
+                        <p>Create purchase orders for procurement operations.</p>
+                    </div>
+                </div>
+                <a class="open-btn" href="/purchaseOrder.html">Open Purchase Order →</a>
+            </section>
+
+            <section class="module-card">
+                <div class="module-top">
+                    <div class="module-icon">⚙️</div>
+                    <div>
+                        <h3>JDE Work Order Create</h3>
+                        <p>Create and manage work orders for operational activities.</p>
+                    </div>
+                </div>
+                <a class="open-btn" href="#">Open Work Order →</a>
+            </section>
+
+            <section class="module-card">
+                <div class="module-top">
+                    <div class="module-icon">📊</div>
+                    <div>
+                        <h3>JDE Inventory Cycle Count Create</h3>
+                        <p>Manage inventory cycle counts and stock verification.</p>
+                    </div>
+                </div>
+                <a class="open-btn" href="/inventoryCycleCountNumber.html">Open Inventory Cycle Count →</a>
+            </section>
+
+        </div>
+
+        <h2 class="section-title spaced">AI Agent → MCP Server → OCI / OIC → JDE EnterpriseOne</h2>
+
+        <section class="module-card">
+            <div class="module-top">
+                <div class="module-icon">🔄</div>
+                <div>
+                    <h3>AI Agent Integration with JDE Explore</h3>
+                    <p>AI Agent → MCP Server → OCI / OIC → JDE EnterpriseOne</p>
+                </div>
+            </div>
+            <a class="open-btn" href="/agentAI.html">Agentic AI →</a>
+        </section>
+    </main>
+
+    <!-- RIGHT: JDE Module -->
+    <aside class="side-panel">
+        <h2 class="side-title">JDE Module</h2>
+        <ul class="side-list">
+            <li><a class="side-item" href="/salesOrder.html"><span class="tag">🛒</span><span>Sales Order</span></a></li>
+            <li><a class="side-item" href="/purchaseOrder.html"><span class="tag">📦</span><span>Purchase Order</span></a></li>
+            <li><a class="side-item" href="#"><span class="tag">⚙️</span><span>Work Order</span></a></li>
+            <li><a class="side-item" href="#"><span class="tag">📊</span><span>Inventory Cycle Count</span></a></li>
+            <li><a class="side-item" href="/agentAI.html"><span class="tag">🔄</span><span>Agentic AI</span></a></li>
+        </ul>
+    </aside>
+
+</div>
+
+<footer class="footer">
+    Anish Kumar | JD Edwards EnterpriseOne (BSSV,ORCH,FDA,RDA,NER,BSFN,BIP,REST & SOAP APIs)| Full Stack Developer(JAVA SpringBoot) | Mobile Apps Developer(Flutter)
+</footer>
+
+<script>
+"use strict";
+
+/* ---------- Login dropdown ---------- */
+(function () {
+    const menu = document.getElementById("loginMenu");
+    const btn = document.getElementById("loginBtn");
+    const btnText = document.getElementById("loginBtnText");
+    const dropdown = document.getElementById("loginDropdown");
+    const registerItem = document.getElementById("registerItem");
+    const loginItem = document.getElementById("loginItem");
+    const logoutItem = document.getElementById("logoutItem");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userLabel = document.getElementById("userLabel");
+
+    // The login page should store the signed-in user name here after a successful login:
+    // sessionStorage.setItem("jdeUser", "anish");
+    function getUser() {
+        try { return sessionStorage.getItem("jdeUser"); } catch (e) { return null; }
+    }
+
+    function renderState() {
+        const user = getUser();
+        if (user) {
+            btnText.textContent = user;
+            userLabel.textContent = "Signed in as " + user;
+            userLabel.hidden = false;
+            registerItem.hidden = true;
+            loginItem.hidden = true;
+            logoutItem.hidden = false;
+        } else {
+            btnText.textContent = "Log in";
+            userLabel.hidden = true;
+            registerItem.hidden = false;
+            loginItem.hidden = false;
+            logoutItem.hidden = true;
+        }
+    }
+
+    function setOpen(open) {
+        dropdown.classList.toggle("open", open);
+        btn.setAttribute("aria-expanded", String(open));
+    }
+
+    btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        setOpen(!dropdown.classList.contains("open"));
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!menu.contains(e.target)) { setOpen(false); }
+    });
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { setOpen(false); btn.focus(); }
+    });
+
+    logoutBtn.addEventListener("click", function () {
+        try { sessionStorage.removeItem("jdeUser"); } catch (e) { /* ignore */ }
+        // If your Spring Boot app has a logout endpoint, call it here before redirecting.
+        window.location.href = "/login_register_logout.html#login";
+    });
+
+    renderState();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JDE Orchestrator & AI Agent Dashboard</title>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f5f9;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 30px;
+        }
+
+        /* ---------- Professional header ---------- */
+        .top-header {
+            max-width: 1400px;
+            width: calc(100% - 48px);
+            margin: 24px auto 0 auto;
+            padding: 18px 28px 18px 32px;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f6ff 100%);
+            border: 1px solid #e1e9f5;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(23, 54, 93, 0.07);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .top-header::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 5px;
+            background: linear-gradient(180deg, #17365d, #5b8cff 60%, #ff5fd2);
+        }
+
+        .brand-badge {
+            flex: none;
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #17365d, #2a5ca8);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: .5px;
+            box-shadow: 0 6px 14px rgba(23, 54, 93, 0.28);
+        }
+        .brand-badge span { color: #4ade80; font-size: 14px; }
+
+        .header-text { flex: 1; min-width: 0; }
+
+        .header-eyebrow {
+            display: block;
+            color: #5b6b82;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .header-text h1 {
+            color: #17365d;
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .header-actions {
+            flex: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .status-chip i {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: statusPulse 1.8s infinite;
+        }
+        @keyframes statusPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, .55); }
+            100% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) { .status-chip i { animation: none; } }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #c9d6ea;
+            border-radius: 999px;
+            background: #fff;
+            color: #17365d;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background .2s, border-color .2s, transform .2s;
+        }
+        .back-link:hover {
+            background: #17365d;
+            border-color: #17365d;
+            color: #fff;
+            transform: translateX(-2px);
+        }
+
+        .main-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 24px auto 0 auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            flex: 1;
+        }
+
+        @media (max-width: 992px) {
+            .main-container { grid-template-columns: 1fr; }
+        }
+
+        .panel-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .panel-title { color: #17365d; font-size: 1.25rem; font-weight: bold; margin-bottom: 16px; }
+
+        .architecture-box {
+            background: #edf4ff;
+            padding: 14px 18px;
+            border-radius: 8px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            border-left: 4px solid #17365d;
+        }
+
+        .chat-title { color: #17365d; font-size: 1.1rem; margin-bottom: 10px; }
+
+        #chat {
+            flex: 1;
+            min-height: 320px;
+            max-height: 480px;
+            overflow-y: auto;
+            border: 1px solid #dcdfe6;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            background: #fafafa;
+        }
+
+        .message {
+            padding: 10px 14px;
+            margin: 8px 0;
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .user { background: #e3efff; color: #17365d; margin-left: 20%; }
+        .agent { background: #e9f7ec; color: #1e4620; margin-right: 20%; }
+
+        .controls { display: flex; gap: 10px; }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            padding: 12px;
+            border: 1px solid #c0c4cc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        input:focus { border-color: #17365d; }
+
+        button {
+            padding: 12px 22px;
+            background: #17365d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background: #0f2440; }
+        button:disabled { background: #8a97a8; cursor: not-allowed; }
+
+        #vizBody {
+            flex: 1;
+            min-height: 320px;
+            max-height: 640px;
+            overflow-y: auto;
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            background: #fafafa;
+            padding: 14px;
+        }
+        #vizBody .process-card { margin: 0; }
+
+        .process-card {
+            background: #ffffff;
+            border: 1px solid #bed7fb;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin: 8px 0;
+        }
+        .process-title { color: #17365d; font-weight: bold; font-size: 0.88rem; margin-bottom: 12px; }
+
+        .proc-step {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            position: relative;
+            padding-bottom: 14px;
+            opacity: 0.45;
+            transition: opacity 0.3s;
+        }
+        .proc-step:last-of-type { padding-bottom: 0; }
+        .proc-step:not(:last-of-type)::before {
+            content: "";
+            position: absolute;
+            left: 13px;
+            top: 28px;
+            bottom: 0;
+            width: 2px;
+            background: #dbe3ee;
+            transition: background 0.4s;
+        }
+        .proc-step.done:not(:last-of-type)::before { background: #10b981; }
+        .proc-step.active, .proc-step.done, .proc-step.failed { opacity: 1; }
+
+        .proc-dot {
+            flex: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: #fff;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .proc-step.active .proc-dot { border-color: #2563eb; animation: procPulse 1s infinite; }
+        .proc-step.done .proc-dot { background: #10b981; border-color: #10b981; }
+        .proc-step.failed .proc-dot { background: #dc2626; border-color: #dc2626; }
+
+        .proc-text h5 { font-size: 0.85rem; color: #0f172a; margin-bottom: 1px; }
+        .proc-text p { font-size: 0.78rem; color: #64748b; }
+        .proc-step.active .proc-text p { color: #2563eb; }
+        .proc-step.done .proc-text p { color: #047857; }
+        .proc-step.failed .proc-text p { color: #b91c1c; }
+
+        .proc-result {
+            margin-top: 12px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .proc-result.error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+
+        .proc-json-title { margin-top: 10px; font-size: 0.75rem; font-weight: bold; color: #17365d; }
+        .proc-json {
+            margin-top: 4px;
+            background: #0f172a;
+            color: #38bdf8;
+            font-family: monospace;
+            font-size: 0.72rem;
+            text-align: left;
+            white-space: pre;
+            padding: 8px;
+            border-radius: 6px;
+            overflow: auto;
+            max-height: 220px;
+        }
+        .proc-json.success { color: #4ade80; }
+        .proc-json.error { color: #f87171; }
+        .proc-note { margin-top: 10px; font-size: 0.7rem; color: #94a3b8; }
+
+        @keyframes procPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45); }
+            100% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .proc-step.active .proc-dot { animation: none; }
+        }
+
+        .flow-banner {
+            --fb-bg-1: #2a2146;
+            --fb-bg-2: #0c0a14;
+            --fb-tile: #1b1728;
+            --fb-tile-line: #2e2842;
+            --fb-tile-hot: #2d2147;
+            --fb-accent: #ff5fd2;
+            --fb-text: #d8d4e6;
+            --fb-cycle: 6s;
+
+            max-width: 1400px;
+            width: calc(100% - 48px);
+            margin: 24px auto 0;
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: radial-gradient(ellipse at 45% 50%, var(--fb-bg-1) 0%, var(--fb-bg-2) 75%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .12);
+        }
+
+        .flow {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 150px;
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+        .flow text { fill: var(--fb-text); }
+
+        .flow__line {
+            fill: none;
+            stroke: #8d86a6;
+            stroke-width: 1.5;
+            stroke-dasharray: 6 6;
+            animation: fb-dash 1.2s linear infinite;
+        }
+        .flow__line--solid {
+            stroke: #8b7bff;
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+            opacity: .8;
+        }
+
+        .flow__packet { fill: #9db4ff; animation: fb-packet var(--fb-cycle) linear infinite; }
+
+        .bot { animation: fb-bob 2.4s ease-in-out infinite; }
+        .bot__box  { fill: var(--fb-tile); stroke: var(--fb-tile-line); stroke-width: 1.2; }
+        .bot__face { fill: none; stroke: #fff; stroke-width: 2.2; }
+        .bot__eye  {
+            fill: #fff;
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: fb-blink 4s infinite;
+        }
+
+        .core { animation: fb-core 3s ease-in-out infinite; }
+        .core__box   { fill: #241d38; stroke: url(#fb-grad); stroke-width: 3; }
+        .core__title { font-size: 32px; font-weight: 800; letter-spacing: 1px; fill: #fff; text-anchor: middle; }
+        .core__sub   { font-size: 12px; font-weight: 600; fill: #fff; text-anchor: middle; opacity: .7; }
+
+        .tile__box {
+            fill: var(--fb-tile);
+            stroke: var(--fb-tile-line);
+            stroke-width: 1.2;
+            animation: fb-glow var(--fb-cycle) infinite;
+            animation-delay: var(--d, 0s);
+        }
+        .tile__title { font-size: 15px; font-weight: 700; text-anchor: middle; }
+        .tile__sub   { font-size: 11px; text-anchor: middle; opacity: .65; }
+
+        .flow__label { font-size: 14px; text-anchor: middle; fill-opacity: .7; }
+        .flow__label--strong { font-size: 15px; font-weight: 700; fill: #fff; fill-opacity: 1; }
+
+        .flow__success {
+            font-size: 13px;
+            font-weight: 700;
+            text-anchor: middle;
+            opacity: 0;
+            animation: fb-success var(--fb-cycle) linear infinite;
+        }
+        .flow .flow__success { fill: #4ade80; }
+
+        @keyframes fb-dash { to { stroke-dashoffset: -12; } }
+        @keyframes fb-packet {
+            0%    { fill: #9db4ff; opacity: 1; }
+            20%   { fill: #ff8fe0; }
+            79.9% { opacity: 1; }
+            80%, 100% { opacity: 0; }
+        }
+        @keyframes fb-core {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(139, 123, 255, .35)); }
+            50%      { filter: drop-shadow(0 0 26px rgba(255, 95, 210, .65)); }
+        }
+        @keyframes fb-glow {
+            0%, 20%, 100% { stroke: var(--fb-tile-line); fill: var(--fb-tile); }
+            4%, 14%       { stroke: var(--fb-accent);    fill: var(--fb-tile-hot); }
+        }
+        @keyframes fb-success {
+            0%, 80%  { opacity: 0; }
+            86%, 97% { opacity: 1; }
+            100%     { opacity: 0; }
+        }
+        @keyframes fb-bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        @keyframes fb-blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+        @media (prefers-reduced-motion: reduce) {
+            .flow__line, .bot, .core, .bot__eye, .tile__box, .flow__success { animation: none; }
+            .flow__packet { display: none; }
+        }
+
+        .flow-svg .node-label { font: 700 13px Arial, sans-serif; fill: #17365d; text-anchor: middle; }
+        .flow-svg .node-sub { font: 11px Arial, sans-serif; fill: #64748b; text-anchor: middle; }
+        .flow-svg .node-icon { font-size: 26px; text-anchor: middle; }
+
+        .viz-idle { padding: 8px 0 4px; }
+
+        .flow-svg.flow-v {
+            width: 100%;
+            max-width: 420px;
+            max-height: none;
+            margin: 0 auto;
+            display: block;
+        }
+        .flow-v .node-label, .flow-v .node-sub { text-anchor: start; }
+
+        .viz-hint {
+            margin-top: 10px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 1024px) {
+            .top-header { flex-wrap: wrap; }
+            .header-actions { width: 100%; justify-content: flex-end; }
+        }
+
+        /* ---------- Banner action buttons ---------- */
+        .flow-banner { display: flex; align-items: center; gap: 16px; }
+        .flow-banner__diagram { flex: 1 1 auto; min-width: 0; }
+
+        @property --fb-ang {
+            syntax: "<angle>";
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        .fb-btn {
+            --c1: #5b8cff;
+            --c2: #ff5fd2;
+            --glow: 91, 140, 255;
+
+            position: relative;
+            flex: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 22px;
+            border-radius: 999px;
+            color: #fff;
+            font: 700 0.95rem Arial, sans-serif;
+            letter-spacing: .3px;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+            isolation: isolate;
+            overflow: hidden;
+            animation: fb-float 3.2s ease-in-out infinite, fb-halo 2.4s ease-in-out infinite;
+            transition: transform .2s ease, filter .2s ease;
+        }
+
+        .fb-btn--jde {
+            --c1: #ff5a3c;
+            --c2: #ffb347;
+            --glow: 255, 120, 60;
+            animation-delay: -1.6s, -1.2s;
+        }
+
+        .fb-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            background: conic-gradient(from var(--fb-ang), var(--c1), var(--c2), transparent 45%, var(--c1));
+            animation: fb-spin 3s linear infinite;
+        }
+
+        .fb-btn::after {
+            content: "";
+            position: absolute;
+            inset: 2px;
+            z-index: -1;
+            border-radius: inherit;
+            background: linear-gradient(135deg, #1d1736, #120f1f);
+        }
+
+        .fb-btn__shine {
+            position: absolute;
+            top: 0;
+            left: -60%;
+            width: 40%;
+            height: 100%;
+            z-index: 0;
+            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .28), transparent);
+            transform: skewX(-20deg);
+            animation: fb-shine 3.6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .fb-btn__icon {
+            position: relative;
+            z-index: 1;
+            width: 20px;
+            height: 20px;
+            flex: none;
+            color: var(--c2);
+        }
+        .fb-btn--ai .fb-btn__icon  { animation: fb-twinkle 2s ease-in-out infinite; }
+        .fb-btn--jde .fb-btn__icon { animation: fb-tilt 3s ease-in-out infinite; }
+
+        .fb-btn__text  { position: relative; z-index: 1; }
+        .fb-btn__arrow { position: relative; z-index: 1; transition: transform .2s ease; }
+
+        .fb-btn:hover, .fb-btn:focus-visible {
+            transform: translateY(-2px) scale(1.05);
+            filter: brightness(1.15);
+            outline: none;
+        }
+        .fb-btn:hover .fb-btn__arrow { transform: translateX(4px); }
+        .fb-btn:active { transform: scale(.97); }
+        .fb-btn:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c1); }
+
+        @keyframes fb-spin    { to { --fb-ang: 360deg; } }
+        @keyframes fb-float   { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
+        @keyframes fb-halo    {
+            0%, 100% { box-shadow: 0 0 10px rgba(var(--glow), .30); }
+            50%      { box-shadow: 0 0 26px rgba(var(--glow), .65); }
+        }
+        @keyframes fb-shine   { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+        @keyframes fb-twinkle {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.25) rotate(20deg); }
+        }
+        @keyframes fb-tilt    { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fb-btn, .fb-btn::before, .fb-btn__shine, .fb-btn__icon { animation: none; }
+        }
+
+        /* ---------- Responsive breakpoints ---------- */
+        @media (min-width: 993px) and (max-width: 1599px) {
+            .main-container { gap: 20px; }
+            .panel-card     { padding: 20px; }
+            #chat           { max-height: 440px; }
+            #vizBody        { max-height: 600px; }
+        }
+
+        @media (min-width: 1600px) {
+            .top-header, .animation-banner, .flow-banner, .main-container { max-width: 1560px; }
+            .main-container { gap: 32px; }
+            .panel-card     { padding: 28px; }
+            .panel-title    { font-size: 1.4rem; }
+            .message        { font-size: 1rem; }
+            #chat           { min-height: 380px; max-height: 560px; }
+            #vizBody        { min-height: 380px; max-height: 720px; }
+        }
+
+        @media (min-width: 601px) and (max-width: 992px) {
+            .panel-card { padding: 20px; }
+            #chat       { min-height: 280px; max-height: 420px; }
+            #vizBody    { max-height: 560px; }
+            .user       { margin-left: 12%; }
+            .agent      { margin-right: 12%; }
+        }
+
+        @media (max-width: 600px) {
+            body { padding-bottom: 16px; }
+
+            .top-header { width: calc(100% - 24px); margin-top: 12px; padding: 14px 14px 14px 18px; gap: 12px; }
+            .brand-badge { width: 42px; height: 42px; font-size: 12px; border-radius: 11px; }
+            .header-text h1 { font-size: 1.05rem; }
+            .header-eyebrow { font-size: 0.62rem; letter-spacing: .8px; }
+            .header-actions { justify-content: space-between; }
+            .back-link { font-size: 0.8rem; padding: 7px 12px; }
+            .status-chip { font-size: 0.72rem; padding: 6px 10px; }
+
+            .animation-banner, .flow-banner {
+                width: calc(100% - 24px);
+                margin-top: 12px;
+                padding: 10px 8px;
+            }
+            .flow-banner__diagram { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .flow-banner .flow { min-width: 720px; max-height: none; }
+
+            .main-container { padding: 0 12px; margin-top: 12px; gap: 12px; }
+            .panel-card     { padding: 14px; border-radius: 10px; }
+            .panel-title    { font-size: 1.1rem; margin-bottom: 12px; }
+            .chat-title     { font-size: 1rem; }
+
+            .architecture-box { padding: 10px 12px; font-size: 0.85rem; line-height: 1.6; margin-bottom: 14px; }
+
+            #chat     { min-height: 260px; max-height: 55vh; padding: 10px; }
+            #vizBody  { min-height: 260px; max-height: 65vh; padding: 10px; }
+            .message  { font-size: 0.9rem; padding: 9px 12px; }
+            .user     { margin-left: 8%; }
+            .agent    { margin-right: 8%; }
+
+            input  { font-size: 16px; min-height: 44px; padding: 10px; }
+            button { min-height: 44px; padding: 10px 16px; }
+            .controls { gap: 8px; }
+
+            .flow-svg.flow-v { max-width: 340px; }
+            .viz-hint        { font-size: 0.8rem; }
+            .proc-json       { font-size: 0.68rem; max-height: 180px; }
+        }
+
+        @media (max-width: 360px) {
+            .header-text h1 { font-size: 0.95rem; }
+            .panel-card             { padding: 12px; }
+            button                  { padding: 10px 12px; }
+        }
+
+        @media (max-width: 992px) {
+            .flow-banner          { flex-wrap: wrap; justify-content: center; }
+            .flow-banner__diagram { order: 3; flex: 1 1 100%; }
+            .fb-btn               { flex: 1 1 calc(50% - 8px); justify-content: center; }
+        }
+
+        @media (max-width: 600px) {
+            .fb-btn { padding: 10px 14px; font-size: 0.85rem; min-height: 44px; gap: 8px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="top-header">
+        <div class="brand-badge" aria-hidden="true">JDE<span>&#10003;</span></div>
+        <div class="header-text">
+            <span class="header-eyebrow">Oracle JD Edwards EnterpriseOne 9.2 &middot; AI Integration</span>
+            <h1>AI Agent Integrate with JD Edwards EnterpriseOne</h1>
+        </div>
+        <div class="header-actions">
+            <span class="status-chip"><i></i>MCP &middot; OIC &middot; Orchestrator</span>
+            <a href="index.html" class="back-link">&larr; Back to Dashboard</a>
+        </div>
+    </header>
+
+    <section class="flow-banner" aria-labelledby="fb-title">
+
+        <!-- UPDATED: opens the PDF in a new tab. Put the PDF at docs/AI_Agents_With_MCP_In_JDE.pdf -->
+        <a class="fb-btn fb-btn--ai" id="agenticBtn"
+           href="file:///C:/Users/anish.kumar/Downloads/AI_Agents_With_MCP_In_JDE.pdf"
+           target="_blank" rel="noopener"
+           aria-label="Open the Agentic AI PDF">
+            <span class="fb-btn__shine" aria-hidden="true"></span>
+            <svg class="fb-btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2z"/>
+                <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/>
+            </svg>
+            <span class="fb-btn__text">Agentic AI</span>
+        </a>
+
+        <div class="flow-banner__diagram">
+    <svg class="flow" viewBox="0 0 1200 250" xmlns="http://www.w3.org/2000/svg"
+         role="img" aria-labelledby="fb-title fb-desc">
+
+        <title id="fb-title">AI Agent to JD Edwards integration flow</title>
+        <desc id="fb-desc">
+            The AI Agent calls the OIC MCP Server, which triggers the OIC Integration,
+            then the JDE Orchestrator, and the sales order is created in JD Edwards EnterpriseOne.
+        </desc>
+
+        <defs>
+            <linearGradient id="fb-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#5b8cff">
+                    <animate attributeName="stop-color" values="#5b8cff;#ff5fd2;#5b8cff" dur="6s" repeatCount="indefinite"/>
+                </stop>
+                <stop offset="1" stop-color="#ff5fd2">
+                    <animate attributeName="stop-color" values="#ff5fd2;#5b8cff;#ff5fd2" dur="6s" repeatCount="indefinite"/>
+                </stop>
+            </linearGradient>
+
+            <path id="fb-p0" d="M110 110H200"/>
+            <path id="fb-p1" d="M340 110H450"/>
+            <path id="fb-p2" d="M610 110H700"/>
+            <path id="fb-p3" d="M860 110H950"/>
+        </defs>
+
+        <g transform="translate(25 0)">
+
+            <use href="#fb-p0" class="flow__line flow__line--solid"/>
+            <use href="#fb-p1" class="flow__line"/>
+            <use href="#fb-p2" class="flow__line"/>
+            <use href="#fb-p3" class="flow__line"/>
+
+            <circle class="flow__packet" r="4.5">
+                <animateMotion path="M110 110H1110" dur="6s" repeatCount="indefinite"
+                               keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"/>
+            </circle>
+
+            <g class="bot">
+                <rect class="bot__box" x="40" y="75" width="70" height="70" rx="14"/>
+                <rect class="bot__face" x="63" y="98" width="24" height="22" rx="7"/>
+                <line class="bot__face" x1="75" y1="98" x2="75" y2="90"/>
+                <circle cx="75" cy="88" r="2.5" fill="#fff"/>
+                <circle class="bot__eye" cx="70.500" cy="109" r="2"/>
+                <circle class="bot__eye" cx="79.500" cy="109" r="2"/>
+            </g>
+            <text class="flow__label" x="75" y="176">AI Agent</text>
+            <text class="tile__sub"   x="75" y="194">Understands the request</text>
+
+            <g class="core">
+                <rect class="core__box" x="200" y="40" width="140" height="140" rx="26"/>
+                <text class="core__title" x="270" y="108">OIC MCP</text>
+                <text class="core__sub"   x="270" y="132">create_order</text>
+            </g>
+            <text class="flow__label flow__label--strong" x="270" y="206">OIC MCP Server</text>
+
+            <g>
+                <rect class="tile__box" style="--d:1.4s" x="450" y="75" width="160" height="70" rx="12"/>
+                <text class="tile__title" x="530" y="106">OIC Integration</text>
+                <text class="tile__sub"   x="530" y="126">Validates, maps &amp; invokes</text>
+            </g>
+
+            <g>
+                <rect class="tile__box" style="--d:2.6s" x="700" y="75" width="160" height="70" rx="12"/>
+                <text class="tile__title" x="780" y="106">JDE Orchestrator</text>
+                <text class="tile__sub"   x="780" y="126">JDE Orchestrator API</text>
+            </g>
+
+            <g>
+                <rect class="tile__box" style="--d:3.8s" x="950" y="75" width="160" height="70" rx="12"/>
+                <text class="tile__title" x="1030" y="106">Order Created</text>
+                <text class="tile__sub"   x="1030" y="126">Order #, status &amp; details</text>
+            </g>
+
+            <text class="flow__success" x="1030" y="176">✔ Order 123456 created</text>
+        </g>
+    </svg>
+        </div>
+
+        <a class="fb-btn fb-btn--jde" id="jdeBtn" href="#" aria-label="Open the JD Edwards sales order page">
+            <span class="fb-btn__shine" aria-hidden="true"></span>
+            <svg class="fb-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3l9 5-9 5-9-5 9-5z"/>
+                <path d="M3 12l9 5 9-5"/>
+                <path d="M3 16l9 5 9-5"/>
+            </svg>
+            <span class="fb-btn__text">JD Edwards</span>
+            <span class="fb-btn__arrow" aria-hidden="true">&rarr;</span>
+        </a>
+    </section>
+
+    <main class="main-container">
+
+        <section class="panel-card">
+            <h2 class="panel-title">System &amp; Order Visualization</h2>
+
+            <div class="architecture-box">
+                <strong>Live Order Process</strong><br>
+                AI Agent &rarr; OIC MCP &rarr; OIC Integration &rarr; JDE Orchestrator
+            </div>
+
+            <div id="vizBody" aria-live="polite">
+                <div class="viz-idle">
+                    <svg class="flow-svg flow-v" viewBox="0 0 420 520" xmlns="http://www.w3.org/2000/svg"
+                         role="img" aria-label="AI Agent to OIC MCP to OIC Integration to JDE Orchestrator to Order Created">
+
+                        <line x1="70" y1="50" x2="70" y2="450" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="8 8">
+                            <animate attributeName="stroke-dashoffset" from="16" to="0" dur="1s" repeatCount="indefinite"/>
+                        </line>
+
+                        <g fill="none" stroke-width="3">
+                            <circle cx="70" cy="50" r="30" stroke="#2563eb" opacity="0">
+                                <animate attributeName="r" values="30;44;44" keyTimes="0;0.15;1" dur="6s" begin="0s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.9;0;0" keyTimes="0;0.15;1" dur="6s" begin="0s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="70" cy="150" r="30" stroke="#7c3aed" opacity="0">
+                                <animate attributeName="r" values="30;44;44" keyTimes="0;0.15;1" dur="6s" begin="1.2s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.9;0;0" keyTimes="0;0.15;1" dur="6s" begin="1.2s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="70" cy="250" r="30" stroke="#ea580c" opacity="0">
+                                <animate attributeName="r" values="30;44;44" keyTimes="0;0.15;1" dur="6s" begin="2.4s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.9;0;0" keyTimes="0;0.15;1" dur="6s" begin="2.4s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="70" cy="350" r="30" stroke="#0284c7" opacity="0">
+                                <animate attributeName="r" values="30;44;44" keyTimes="0;0.15;1" dur="6s" begin="3.6s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.9;0;0" keyTimes="0;0.15;1" dur="6s" begin="3.6s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="70" cy="450" r="30" stroke="#10b981" opacity="0">
+                                <animate attributeName="r" values="30;44;44" keyTimes="0;0.15;1" dur="6s" begin="4.8s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.9;0;0" keyTimes="0;0.15;1" dur="6s" begin="4.8s" repeatCount="indefinite"/>
+                            </circle>
+                        </g>
+
+                        <g stroke-width="2">
+                            <circle cx="70" cy="50"  r="30" fill="#ffffff" stroke="#2563eb"/>
+                            <circle cx="70" cy="150" r="30" fill="#ffffff" stroke="#7c3aed"/>
+                            <circle cx="70" cy="250" r="30" fill="#ffffff" stroke="#ea580c"/>
+                            <circle cx="70" cy="350" r="30" fill="#ffffff" stroke="#0284c7"/>
+                            <circle cx="70" cy="450" r="30" fill="#f0fdf4" stroke="#10b981"/>
+                        </g>
+
+                        <text class="node-icon" x="70" y="59">🤖</text>
+                        <text class="node-icon" x="70" y="159">☁️</text>
+                        <text class="node-icon" x="70" y="259">🔗</text>
+                        <text class="node-icon" x="70" y="359">⚙️</text>
+                        <text class="node-icon" x="70" y="459">📋</text>
+
+                        <text class="node-label" x="125" y="46">AI Agent</text>
+                        <text class="node-sub"   x="125" y="64">Understands the request</text>
+                        <text class="node-label" x="125" y="146">OIC MCP Server</text>
+                        <text class="node-sub"   x="125" y="164">Exposes create_order</text>
+                        <text class="node-label" x="125" y="246">OIC Integration</text>
+                        <text class="node-sub"   x="125" y="264">Validates, maps &amp; invokes</text>
+                        <text class="node-label" x="125" y="346">JDE Orchestrator</text>
+                        <text class="node-sub"   x="125" y="364">JDE Orchestrator API</text>
+                        <text class="node-label" x="125" y="446">Order Created</text>
+                        <text class="node-sub"   x="125" y="464">Order #, status &amp; details</text>
+
+                        <circle r="7" fill="#2563eb" opacity="0">
+                            <animateMotion path="M70 50 V450" dur="6s" repeatCount="indefinite"
+                                           keyPoints="0;1;1" keyTimes="0;0.8;1" calcMode="linear"/>
+                            <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.79;0.8;1" dur="6s" repeatCount="indefinite"/>
+                            <animate attributeName="fill" values="#2563eb;#7c3aed;#ea580c;#0284c7;#10b981"
+                                     keyTimes="0;0.2;0.4;0.6;0.8" dur="6s" repeatCount="indefinite" calcMode="discrete"/>
+                        </circle>
+                    </svg>
+
+                    <p class="viz-hint">
+                        No order running yet. Type <strong>"Create a sales order"</strong> in the AI Assistant to see the live process here.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel-card">
+            <h2 class="panel-title">AI Agent with JD Edwards EnterpriseOne</h2>
+
+            <div class="architecture-box">
+                <strong>Integration Architecture</strong><br>
+                AI Agent &rarr; MCP Server &rarr; OCI / OIC &rarr; JDE EnterpriseOne 9.2
+            </div>
+
+            <h3 class="chat-title">JDE AI Assistant</h3>
+
+            <div id="chat" aria-live="polite">
+                <div class="message agent">Hello! I’m your AI Assistant. Ask me anything. I can help explain concepts, troubleshoot errors, guide implementations, support development and integration tasks. Try typing: Create a sales order.</div>
+            </div>
+
+            <form id="chatForm" class="controls">
+                <input
+                    id="prompt"
+                    type="text"
+                    placeholder="Example: Create a sales order"
+                    autocomplete="off"
+                    required>
+                <button type="submit">Send</button>
+            </form>
+        </section>
+
+    </main>
+
+<script>
+    const form = document.getElementById("chatForm");
+    const promptInput = document.getElementById("prompt");
+    const chat = document.getElementById("chat");
+    const vizBody = document.getElementById("vizBody");
+
+    // Replace with your Spring Boot proxy endpoint when ready (avoids CORS, keeps keys server-side).
+    const AI_ENDPOINT = "https://text.pollinations.ai/";
+
+    // Same endpoint used by salesOrder.html
+    const CREATE_URL = "/sales-order/create";
+
+    // Fixed value used by the Sales Order form's "Select Row" field
+    const DEFAULT_SELECT_ROW = "1";
+
+    const SYSTEM_PROMPT =
+        "You are an AI assistant specializing in Oracle JD Edwards EnterpriseOne 9.2, JDE Finance, " +
+        "Sales Orders, Address Book, Inventory, BSSV, Orchestrator, MCP, OCI, OIC, and Spring Boot " +
+        "integration. Give clear, practical technical answers.";
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const message = promptInput.value.trim();
+        if (!message) return;
+
+        addMessage(message, "user");
+        promptInput.value = "";
+
+        // Order requests are handled by the guided flow; everything else goes to the AI endpoint
+        if (handleOrderFlow(message)) return;
+
+        const loadingDiv = addMessage("Thinking...", "agent");
+        const sendButton = form.querySelector("button");
+        if (sendButton) sendButton.disabled = true;
+
+        try {
+            const response = await fetch(AI_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    messages: [
+                        { role: "system", content: SYSTEM_PROMPT },
+                        { role: "user", content: message }
+                    ],
+                    model: "openai"
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error("HTTP " + response.status + " - " + response.statusText);
+            }
+
+            const raw = await response.text();
+            let answer = raw;
+            try {
+                const data = JSON.parse(raw);
+                answer = data.choices?.[0]?.message?.content ?? raw;
+            } catch (_) {
+                /* plain text response */
+            }
+
+            loadingDiv.textContent = answer || "The API returned an empty answer.";
+
+        } catch (error) {
+            console.error("AI API error:", error);
+            loadingDiv.textContent =
+                "Unable to get an AI response: " + error.message +
+                ". Check the browser console for details. If the browser blocks the request due to CORS, use a Spring Boot backend proxy.";
+        } finally {
+            if (sendButton) sendButton.disabled = false;
+            promptInput.focus();
+            chat.scrollTop = chat.scrollHeight;
+        }
+    });
+
+    /* ---------- Guided "Create Sales Order" flow ---------- */
+    const DEFAULT_PLACEHOLDER = promptInput.placeholder;
+
+    const ORDER_FIELDS = [
+        {
+            key: "businessUnit",
+            ask: "Which Business Unit? (e.g., M30)",
+            hint: "Business Unit, e.g. M30",
+            parse: v => v.toUpperCase(),
+            valid: v => /^[A-Za-z0-9]{1,12}$/.test(v),
+            error: "Business Unit should be letters or numbers only, e.g. M30."
+        },
+        {
+            key: "soldTo",
+            ask: "Sold To address book number? (e.g., 4242)",
+            hint: "Sold To, e.g. 4242",
+            parse: v => Number(v),
+            valid: v => /^\d+$/.test(v),
+            error: "Sold To must be a whole number, e.g. 4242."
+        },
+        {
+            key: "shipTo",
+            ask: "Ship To address book number? Type \"same\" to use the Sold To number.",
+            hint: "Ship To, or type: same",
+            parse: (v, data) => /^same$/i.test(v) ? data.soldTo : Number(v),
+            valid: v => /^same$/i.test(v) || /^\d+$/.test(v),
+            error: "Ship To must be a whole number, or type \"same\"."
+        },
+        {
+            key: "itemNumber",
+            ask: "Item number? (e.g., 210)",
+            hint: "Item number, e.g. 210",
+            parse: v => v,
+            valid: v => /^[A-Za-z0-9\-\.\/]{1,25}$/.test(v),
+            error: "Item number should be letters, numbers or - . / only, e.g. 210."
+        },
+        {
+            key: "quantity",
+            ask: "Quantity? (e.g., 100)",
+            hint: "Quantity, e.g. 100",
+            parse: v => Number(v),
+            valid: v => /^\d+(\.\d+)?$/.test(v) && Number(v) > 0,
+            error: "Quantity must be a number greater than 0, e.g. 100."
+        },
+        {
+            key: "unitPrice",
+            ask: "Unit price in ₹? (e.g., 100)",
+            hint: "Unit price, e.g. 100",
+            parse: v => Number(v),
+            valid: v => /^\d+(\.\d+)?$/.test(v),
+            error: "Unit price must be a number (0 or more), e.g. 100."
+        }
+    ];
+
+    const PROCESS_STEPS = [
+        { icon: "🤖", title: "AI Agent",         active: "Reading your request and parameters…", done: "Parameters collected" },
+        { icon: "☁️", title: "OIC MCP Server",   active: "Calling tool create_order…",           done: "Tool invoked" },
+        { icon: "🔗", title: "OIC Integration",  active: "Validating and mapping the payload…",  done: "Payload validated" },
+        { icon: "⚙️", title: "JDE Orchestrator", active: "Running Sales Order Create…",          done: "Orchestration completed" },
+        { icon: "📋", title: "Order Created",    active: "Fetching order details…",              done: "Order created" }
+    ];
+
+    // Index of the step that waits for the real backend response
+    const API_STEP_INDEX = 3;
+
+    let orderState = null; // { step, data } while the agent is collecting inputs
+
+    function toSalesOrderPayload(d) {
+        return {
+            Business_Unit: d.businessUnit,
+            Long_Address_Number: String(d.soldTo),
+            Long_Address_Number_Shipto: String(d.shipTo),
+            Quantity_Ordered: d.quantity,
+            Item_Number: d.itemNumber,
+            Unit_Price: d.unitPrice,
+            Select_Row: DEFAULT_SELECT_ROW
+        };
+    }
+
+    function handleOrderFlow(message) {
+        if (orderState) {
+            if (/^(cancel|stop|quit|exit)$/i.test(message)) {
+                orderState = null;
+                promptInput.placeholder = DEFAULT_PLACEHOLDER;
+                addMessage("Order cancelled. Ask me anything else.", "agent");
+                return true;
+            }
+
+            const field = ORDER_FIELDS[orderState.step];
+            if (!field.valid(message)) {
+                addMessage(field.error + "\n" + field.ask, "agent");
+                return true;
+            }
+
+            orderState.data[field.key] = field.parse(message, orderState.data);
+            orderState.step++;
+
+            if (orderState.step < ORDER_FIELDS.length) {
+                askNextField();
+            } else {
+                const data = orderState.data;
+                orderState = null;
+                promptInput.placeholder = DEFAULT_PLACEHOLDER;
+                runOrderProcess(data);
+            }
+            return true;
+        }
+
+        const wantsOrder =
+            /\b(create|new|place|enter|make|add)\b.*\b(sales\s*)?order\b/i.test(message) ||
+            /\b(sales\s*)?order\b.*\b(create|new|place)\b/i.test(message);
+
+        if (wantsOrder) {
+            orderState = { step: 0, data: {} };
+            addMessage("Sure, I can create a sales order in JD Edwards. I need " + ORDER_FIELDS.length + " details. Type \"cancel\" at any time to stop.", "agent");
+            askNextField();
+            return true;
+        }
+
+        return false;
+    }
+
+    function askNextField() {
+        const field = ORDER_FIELDS[orderState.step];
+        addMessage("(" + (orderState.step + 1) + "/" + ORDER_FIELDS.length + ") " + field.ask, "agent");
+        promptInput.placeholder = field.hint;
+        promptInput.focus();
+    }
+
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function callCreateOrder(payload) {
+        try {
+            const response = await fetch(CREATE_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const text = await response.text();
+            let body;
+            try {
+                body = JSON.parse(text);
+            } catch (_) {
+                body = text;
+            }
+
+            return { ok: response.ok, status: response.status, body: body };
+        } catch (error) {
+            return { ok: false, status: 0, body: null, error: error.message };
+        }
+    }
+
+    function firstValue(object, keys, fallback = "") {
+        for (const key of keys) {
+            if (object && object[key] !== undefined && object[key] !== null && object[key] !== "") {
+                return object[key];
+            }
+        }
+        return fallback;
+    }
+
+    function extractOrderNumber(body) {
+        if (!body || typeof body !== "object") return "";
+
+        let target = body;
+        if (body.jdeResponse) {
+            const forms = body.jdeResponse.ServiceRequest1?.forms || [];
+            const header = forms.find(f => f.fs_P4210_W4210G?.data && f.fs_P4210_W4210G.data.z_DOCO_102);
+            target = header ? header.fs_P4210_W4210G.data : (body.data || body);
+        } else if (body.data) {
+            target = body.data;
+        }
+
+        const raw = firstValue(target, ["z_DOCO_102", "orderNumber", "Order_Number", "orderNo", "DOCO"], "");
+        const value = (raw && typeof raw === "object") ? raw.value : raw;
+        return value ? String(value) : "";
+    }
+
+    async function runOrderProcess(data) {
+        const sendButton = form.querySelector("button");
+        sendButton.disabled = true;
+        promptInput.disabled = true;
+
+        const payload = toSalesOrderPayload(data);
+
+        addMessage("Thanks, I have everything. Creating the sales order now. Watch the System & Order Visualization panel.", "agent");
+
+        const card = document.createElement("div");
+        card.className = "process-card";
+
+        const title = document.createElement("div");
+        title.className = "process-title";
+        title.textContent = "⚡ Working process: AI Agent → MCP → OIC → JDE";
+        card.appendChild(title);
+
+        const stepEls = PROCESS_STEPS.map(s => {
+            const row = document.createElement("div");
+            row.className = "proc-step";
+            row.innerHTML =
+                '<div class="proc-dot"></div>' +
+                '<div class="proc-text"><h5></h5><p></p></div>';
+            row.querySelector(".proc-dot").textContent = s.icon;
+            row.querySelector("h5").textContent = s.title;
+            row.querySelector("p").textContent = "Waiting";
+            card.appendChild(row);
+            return row;
+        });
+
+        vizBody.innerHTML = "";
+        vizBody.appendChild(card);
+        vizBody.scrollTop = 0;
+
+        // Fire the real request right away; the animation waits for it at the JDE step
+        const requestPromise = callCreateOrder(payload);
+
+        let apiResult = null;
+        let failedAt = -1;
+        let orderNumber = "";
+
+        for (let i = 0; i < PROCESS_STEPS.length; i++) {
+            const row = stepEls[i];
+            const step = PROCESS_STEPS[i];
+
+            row.classList.add("active");
+            row.querySelector("p").textContent = step.active;
+            row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+
+            if (i === API_STEP_INDEX) {
+                apiResult = await requestPromise;
+                await sleep(400);
+
+                if (!apiResult.ok) {
+                    failedAt = i;
+                    row.classList.remove("active");
+                    row.classList.add("failed");
+                    row.querySelector(".proc-dot").textContent = "✕";
+                    row.querySelector("p").textContent =
+                        apiResult.status ? "Failed (HTTP " + apiResult.status + ")" : "Request failed";
+                    break;
+                }
+
+                orderNumber = extractOrderNumber(apiResult.body);
+            } else {
+                await sleep(900);
+            }
+
+            row.classList.remove("active");
+            row.classList.add("done");
+            row.querySelector(".proc-dot").textContent = "✓";
+
+            row.querySelector("p").textContent =
+                (i === PROCESS_STEPS.length - 1)
+                    ? (orderNumber ? "Order #" + orderNumber + " created" : "Order created")
+                    : step.done;
+        }
+
+        const result = document.createElement("div");
+        result.className = "proc-result";
+
+        if (failedAt === -1) {
+            result.textContent = orderNumber
+                ? "✔ Sales order " + orderNumber + " created successfully"
+                : "✔ Sales order created (order number not returned in the response)";
+        } else {
+            result.classList.add("error");
+            result.textContent = "✕ Sales order could not be created";
+        }
+        card.appendChild(result);
+
+        addJsonBlock(card, "📤 Request payload", payload, "");
+
+        if (failedAt === -1) {
+            const responseBody = (apiResult.body && typeof apiResult.body === "object")
+                ? apiResult.body
+                : { status: "SUCCESS", response: apiResult.body };
+            addJsonBlock(card, "📥 Response (HTTP " + apiResult.status + ")", responseBody, "success");
+        } else {
+            const errorBody = apiResult.error
+                ? { error: apiResult.error }
+                : (apiResult.body && typeof apiResult.body === "object" ? apiResult.body : { response: apiResult.body });
+            addJsonBlock(card, "📥 Error (HTTP " + apiResult.status + ")", errorBody, "error");
+
+            const note = document.createElement("div");
+            note.className = "proc-note";
+            note.textContent = "Check that the backend is running and that " + CREATE_URL + " is reachable from this page. Type \"create a sales order\" to try again.";
+            card.appendChild(note);
+        }
+
+        addMessage(
+            failedAt === -1
+                ? (orderNumber ? "Done. Sales order " + orderNumber + " was created." : "Done. The sales order was created.")
+                : "The sales order could not be created. See the visualization panel for details.",
+            "agent"
+        );
+
+        sendButton.disabled = false;
+        promptInput.disabled = false;
+        promptInput.focus();
+    }
+
+    function addJsonBlock(parent, titleText, obj, variant) {
+        const t = document.createElement("div");
+        t.className = "proc-json-title";
+        t.textContent = titleText;
+
+        const pre = document.createElement("div");
+        pre.className = "proc-json" + (variant ? " " + variant : "");
+        pre.textContent = JSON.stringify(obj, null, 2);
+
+        parent.appendChild(t);
+        parent.appendChild(pre);
+    }
+
+    // Pause all SVG animations for users who prefer reduced motion
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.querySelectorAll(".flow-svg, .flow").forEach(svg => svg.pauseAnimations());
+    }
+
+    // NOTE: The old "Agentic AI" click handler (preventDefault + scroll to chat) was removed.
+    // The button is now a normal link that opens docs/AI_Agents_With_MCP_In_JDE.pdf in a new tab.
+
+    function addMessage(text, type) {
+        const div = document.createElement("div");
+        div.className = "message " + type;
+        div.textContent = text;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+
+        return div;
+    }
+</script>
+</body>
+</html>
